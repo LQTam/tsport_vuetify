@@ -1,38 +1,35 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
-function initState() {
-    return {
-        supplier: {},
-        loading: false
-    };
-}
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import productSingleStore from './Product/single';
 
-const getters = {
-    supplier: state => state.supplier
-};
+@Module({dynamic: true, name:"supplierStore", store, namespaced: true})
+class SupplierStore extends VuexModule {
+    supplierState: any= {};
 
-const actions = {
-    store({ dispatch }, data) {
+    loadingState: any= false;
+
+    get supplier(): any{
+        return this.supplier;
+    }
+
+    @Mutation
+    SET_SUPPLIER(supplier: any) {
+        this.supplierState = supplier
+    }
+
+    @Action({})
+    store(data:any) {
         return new Promise((resolve, reject) => {
             apiURL.post('suppliers', data)
                 .then(({ data }) => {
                     resolve(data)
-                    dispatch("ProductSingle/fetchSuppliersAll", null, { root: true });
+                    productSingleStore.fetchSuppliersAll();
                 })
                 .catch(({ response }) => reject(response))
         })
     }
-};
+}
 
-const mutations = {
-    SET_SUPPLIER(state, supplier) {
-        state.supplier = supplier
-    }
-};
-
-export default {
-    namespaced: true,
-    state: initState(),
-    getters,
-    actions,
-    mutations
-};
+const supplierStore = getModule(SupplierStore);
+export default supplierStore;

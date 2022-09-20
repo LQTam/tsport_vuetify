@@ -1,126 +1,135 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import alertStore from '../alert';
+import permissionIndexStore from '.';
 
-function initState() {
-  return {
-    permission: {
-      id: "",
-      name: ""
-    },
-    fetching: false
-  };
-}
+@Module({dynamic: true, name:'PermissionSingleStore', store, namespaced: true})
+class PermissiongSingleStore extends VuexModule {
+  permissionState: any= {
+    id: "",
+    name: ""
+  }
+  fetchingState: any= false
 
-const getters = {
-  permission: state => state.permission,
-  fetching: state => state.fetching
-};
+  get permission(): any {
+    return this.permissionState;
+  }
 
-const actions = {
-  fetch({ commit, dispatch, state }) {
+  get fetching(): any {
+    return this.fetchingState;
+  }
+
+  @Action
+  fetch() {
     apiURL
-      .get(`permissions/${state.permission.id}`, state.permission)
+      .get(`permissions/${this.permissionState.id}`, this.permissionState)
       .then(res => {
-        commit("SET_PERMISSION", res.data.data);
+        this.SET_PERMISSION(res.data.data);
       })
       .catch(err => {
-        const { errors, message } = err.response.data;
-        dispatch("Alert/setAlert", { errors, message, color: "danger" });
+        let { errors, message } = err.response.data;
+        alertStore.setAlert({ errors, message, color: "danger" });
       });
-  },
-  store({ commit, dispatch, state }) {
-    commit("SET_FETCHING", true);
+  }
+
+  @Action
+  store() {
+    this.SET_FETCHING(true);
     return new Promise((resolve, reject) => {
       apiURL
-        .post("permissions", state.permission)
+        .post("permissions", this.permissionState)
         .then(res => {
-          dispatch("PermissionIndex/fetchData", null, { root: true });
+          permissionIndexStore.fetchData();
           resolve(res);
         })
         .catch(err => {
           const { errors, message } = err.response.data;
-          dispatch(
-            "Alert/setAlert",
-            { errors, message, color: "danger" },
-            { root: true }
-          );
+          alertStore.setAlert({ errors, message, color: "danger" })
           reject(err.response);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.SET_FETCHING(false));
     });
-  },
-  update({ commit, dispatch, state }) {
-    commit("SET_FETCHING", true);
+  }
+  
+  @Action
+  update() {
+    this.SET_FETCHING(true);
     return new Promise((resolve, reject) => {
       apiURL
-        .put(`permissions/${state.permission.id}`, state.permission)
+        .put(`permissions/${this.permissionState.id}`, this.permissionState)
         .then(res => {
-          dispatch("PermissionIndex/fetchData", null, { root: true });
+          permissionIndexStore.fetchData();
           resolve(res);
         })
         .catch(err => {
           const { errors, message } = err.reponse.data;
-          dispatch(
-            "Alert/setAlert",
-            { errors, message, color: "danger" },
-            { root: true }
-          );
+          alertStore.setAlert({ errors, message, color: "danger" })
           reject(err);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.SET_FETCHING(false));
     });
-  },
-  delete({ commit, dispatch, state }) {
-    commit("SET_FETCHING", true);
+  }
+
+  @Action
+  delete() {
+    this.SET_FETCHING(true);
     return new Promise((resolve, reject) => {
       apiURL
-        .delete(`permissions/${state.permission.id}`, state.permission)
+        .delete(`permissions/${this.permissionState.id}`, this.permissionState)
         .then(res => {
-          dispatch("PermissionIndex/fetchData", null, { root: true });
+          permissionIndexStore.fetchData();
           resolve(res);
         })
         .catch(err => {
           const { errors, message } = err.reponse.data;
-          dispatch(
-            "Alert/setAlert",
-            { errors, message, color: "danger" },
-            { root: true }
-          );
+          alertStore.setAlert({ errors, message, color: "danger" })
           reject(err);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.SET_FETCHING(false));
     });
-  },
-  updateName({ commit }, name) {
-    commit("UPDATE_NAME", name);
-  },
-  setPermission({ commit }, permission = { id: "", name: "" }) {
-    commit("SET_PERMISSION", permission);
-  },
-  resetState({ commit }) {
-    commit("INIT_STATE");
   }
-};
 
-const mutations = {
-  SET_FETCHING(state, stus) {
-    state.fetching = stus;
-  },
-  UPDATE_NAME(state, name) {
-    state.permission.name = name;
-  },
-  SET_PERMISSION(state, permission) {
-    state.permission = permission;
-  },
-  // eslint-disable-next-line no-unused-vars
-  INIT_STATE(state) {
-    state = Object.assign(state, initState());
+  @Action
+  updateName(name: any) {
+    this.UPDATE_NAME(name);
   }
-};
 
-export default {
-  namespaced: true,
-  state: initState(),
-  getters,
-  actions,
-  mutations
-};
+  @Action
+  setPermission(permission = { id: "", name: "" }) {
+    this.SET_PERMISSION(permission);
+  }
+
+  @Action
+  resetState() {
+    this.INIT_STATE;
+  }
+
+  @Mutation
+  SET_FETCHING(stus: any) {
+    this.fetchingState = stus;
+  }
+
+  @Mutation
+  UPDATE_NAME(name: any) {
+    this.permissionState.name = name;
+  }
+
+  @Mutation
+  SET_PERMISSION(permission: any) {
+    this.permissionState = permission;
+  }
+
+  @Mutation
+  INIT_STATE() {
+    this.permissionState= {
+      id: "",
+      name: ""
+    }
+    this.fetchingState= false
+  }
+}
+
+const PermissionSingleStore = getModule(PermissiongSingleStore);
+
+export default PermissionSingleStore;

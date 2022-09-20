@@ -1,82 +1,106 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 
-function initState() {
-  return {
-    roles: {
-      meta: {
-        last_page: 1,
-        current_page: 1,
-        total: 0
-      }
-    },
-    query: {
-      length: 10,
-      dir: "desc",
-      column: 0,
-      search: "",
-      page: 1
-    },
-    fetching: false
+@Module({name: "roleIndexStore", dynamic: true, store, namespaced: true})
+class RoleIndexStore extends VuexModule {
+  rolesState: any = {
+    meta: {
+      last_page: 1,
+      current_page: 1,
+      total: 0
+    }
   };
-}
 
-const getters = {
-  roles: state => state.roles,
-  query: state => state.query,
-  fetching: state => state.fetching
-};
+  queryState: any = {
+    length: 10,
+    dir: "desc",
+    column: 0,
+    search: "",
+    page: 1
+  };
 
-const actions = {
-  fetchData({ commit, state }, query = null) {
-    commit("SET_FETCHING", true);
+  fetchingState: any = false;
+
+  get roles(): any {
+    return this.rolesState;
+  }
+
+  get query(): any {
+    return this.queryState;
+  }
+
+  get fetching(): any {
+    return this.fetchingState;
+  }
+
+  @Action
+  fetchData(query = null) {
+    this.fetchingState = true;
     return new Promise((resolve, reject) => {
       return apiURL
         .get(
           "roles",
-          query != null ? { params: query } : { params: state.query }
+          query != null ? { params: query } : { params: this.queryState }
         )
         .then(res => {
           const { data, meta, links } = res.data;
-          commit("SET_ALL", { meta, links, data });
+          this.SET_ALL({meta, links, data});
           resolve(res.data);
         })
         .catch(err => {
           reject(err.response);
         })
         .finally(() => {
-          commit("SET_FETCHING", false);
+          this.fetchingState = false;
         });
     });
-  },
-
-  setQuery({ commit }, query) {
-    commit("SET_QUERY", query);
-  },
-  resetState({ commit }) {
-    commit("INIT_STATE");
   }
-};
 
-const mutations = {
-  SET_FETCHING(state, stus) {
-    state.fetching = stus;
-  },
-  SET_ALL(state, data) {
-    state.roles = data;
-  },
-  SET_QUERY(state, query) {
-    state.query = query;
-  },
-  // eslint-disable-next-line no-unused-vars
-  INIT_STATE(state) {
-    state = Object.assign(state, initState());
+  @Mutation
+  SET_FETCHING(stus: any) {
+    this.fetchingState = stus;
   }
-};
 
-export default {
-  namespaced: true,
-  state: initState(),
-  getters,
-  actions,
-  mutations
-};
+  @Mutation
+  SET_ALL(data: any) {
+    this.rolesState = data;
+  } 
+
+  @Mutation
+  SET_QUERY(query: any) {
+    this.queryState = query;
+  }
+
+  @Mutation
+  INIT_STATE() {
+    this.rolesState = {
+      meta: {
+        last_page: 1,
+        current_page: 1,
+        total: 0
+      }
+    },
+    this.queryState = {
+      length: 10,
+      dir: "desc",
+      column: 0,
+      search: "",
+      page: 1
+    },
+    this.fetchingState = false
+  }
+
+  @Action({commit: "SET_QUERY"})
+  setQuery(query: any) {
+    return query;
+  }
+
+  @Action
+  resetState() {
+    this.INIT_STATE;
+  }
+}
+
+const roleIndexStore = getModule(RoleIndexStore);
+export default roleIndexStore;

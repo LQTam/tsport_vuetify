@@ -1,5 +1,5 @@
 import Vue from "vue";
-import VueRouter from "vue-router";
+import VueRouter, { NavigationGuardNext, Route } from "vue-router";
 
 Vue.use(VueRouter);
 
@@ -104,7 +104,7 @@ const routes = [
     path: "/user",
     name: "user",
     redirect: "/user/profile",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: (to: Route, from: Route, next: NavigationGuardNext) => {
       if (sessionStorage.userLoggedIn) next()
       else {
         next({ name: 'login' })
@@ -217,7 +217,7 @@ const routes = [
     path: "/admin",
     name: "admin",
     redirect: "/admin/dashboard",
-    beforeEnter: (to, from, next) => {
+    beforeEnter: (to: Route, from: Route, next: NavigationGuardNext) => {
       const user = JSON.parse(sessionStorage.user)
       if (user.role_name.includes('admin')) next()
       else {
@@ -339,20 +339,20 @@ const router = new VueRouter({
   routes
 });
 
-router.beforeEach((to, from, next) => {
+router.beforeEach((to: Route, from: Route, next: NavigationGuardNext) => {
   const nearestWithTitle = to.matched.slice().reverse().find(r => r.meta && r.meta.title);
   const nearestWithMeta = to.matched.slice().reverse().find(r => r.meta && r.meta.metaTags);
   // const previousNearestWithMeta = from.matched.slice().reverse().find(r => r.meta && r.meta.metaTags);
   if (nearestWithTitle) document.title = nearestWithTitle.meta.title;
 
   // Remove any stale meta tags from the document using the key attribute we set below.
-  Array.from(document.querySelectorAll('[data-vue-router-controlled]')).map(el => el.parentNode.removeChild(el));
+  Array.from(document.querySelectorAll('[data-vue-router-controlled]')).map((el: any) => el.parentNode.removeChild(el));
 
   // Skip rendering meta tags if there are none.
   if (!nearestWithMeta) return next();
 
   // Turn the meta tag definitions into actual elements in the head.
-  nearestWithMeta.meta.metaTags.map(tagDef => {
+  nearestWithMeta.meta.metaTags.map((tagDef: any) => {
     const tag = document.createElement('meta');
 
     Object.keys(tagDef).forEach(key => {
@@ -365,7 +365,7 @@ router.beforeEach((to, from, next) => {
     return tag;
   })
     // Add the meta tags to the document head.
-    .forEach(tag => document.head.appendChild(tag));
+    .forEach((tag: HTMLMetaElement) => document.head.appendChild(tag));
   if (to.matched.some(record => record.meta.guest)) {
     if (sessionStorage.authToken == null && sessionStorage.userLoggedIn == null)
       next();

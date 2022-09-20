@@ -1,39 +1,69 @@
+import store from "../index";
 import { apiURL } from "@/utils";
-function initState() {
-    return {
-        categories: [],
-        loading: false,
-        category: {},
-    };
-}
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 
-const getters = {
-    categories: state => state.categories,
-    category: state => state.category
-};
+@Module({dynamic: true, store, name: "categoryIndexStore", namespaced: true})
+class CategoryIndexStore extends VuexModule {
+    categoriesState: [] = [];
 
-const actions = {
-    fetchData({ commit }, params = null) {
-        commit("SET_LOADING", true);
+    loadingState: boolean = false;
+
+    categoryState: any = {};
+
+    get categories(): any {
+        return () => this.categoriesState;
+    }
+
+    get category(): any {
+        return this.categoryState;
+    }
+
+    @Mutation
+    SET_ALL(cates: any) {
+        this.categoriesState = cates
+    }
+    
+    @Mutation
+    SET_CATEGORY(cate: any) {
+        this.categoryState = cate
+    }
+    
+    @Mutation
+    SET_LOADING(stat: any) {
+        this.loadingState= stat
+    }
+    
+    @Mutation
+    INIT_STATE() {
+        this.categoriesState =  [];
+        this.loadingState =  false;
+        this.categoryState =  {};
+    }
+
+    @Action({})
+    fetchData(params = null) {
+        this.loadingState = true;
         return new Promise((resolve, reject) => {
             return apiURL
                 .get("/categories", { params: params })
                 .then(({ data }) => {
-                    commit("SET_ALL", data);
+                    this.SET_ALL(data);
                     resolve(data);
                 })
                 .catch(err => {
                     reject(err.response);
                 })
-                .finally(() => commit("SET_LOADING", false));
+                .finally(() => this.loadingState = false);
         })
-    },
-    store({dispatch}, category) {
+    }
+
+    @Action({})
+    store(category: any) {
         return new Promise((resolve, reject) => {
             return apiURL
                 .post("/categories", category)
                 .then(({ data }) => {
-                    dispatch("Category/fetchData", null, { root: true })
+                    this.fetchData();
                     resolve(data);
                 })
                 .catch(err => {
@@ -41,28 +71,7 @@ const actions = {
                 })
         })
     }
-};
-
-const mutations = {
-    SET_ALL(state, cates) {
-        state.categories = cates
-    },
-    SET_CATEGORY(state, cate) {
-        state.category = cate
-    },
-    SET_LOADING(state, stat) {
-        state.loading = stat
-    },
-    // eslint-disable-next-line no-unused-vars
-    INIT_STATE(state) {
-        state = Object.assign(state, initState());
-    }
-};
-
-export default {
-    namespaced: true,
-    state: initState(),
-    getters,
-    actions,
-    mutations
-};
+}
+ 
+const categoryIndexStore = getModule(CategoryIndexStore);
+export default categoryIndexStore;

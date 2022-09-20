@@ -1,56 +1,77 @@
-function initAlert() {
-  return {
-    errors: null,
-    message: null,
-    color: "success"
-  };
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import store from "..";
+
+@Module({dynamic: true, name: "alert", store, namespaced: true})
+class AlertStore extends VuexModule {
+  errorsData: [] = [];
+
+  messageData: string = "";
+
+  colorData: string = "success";
+
+  get errors(): [] {
+    return this.errorsData;
+  }
+
+  get message(): string {
+    return this.messageData;
+  }
+
+  get color(): string {
+    return this.color;
+  }
+
+  @Mutation
+  SET_MESSAGE(message: any) {
+    this.messageData = message;
+  }
+
+  @Mutation
+  SET_COLOR(color: any) {
+    this.colorData = color;
+  }
+
+  @Mutation
+  SET_ERRORS(errors: any) {
+    this.errorsData = errors;
+  }
+
+  @Mutation
+  RESET_ALERT() {
+    this.messageData = "";
+    this.colorData = "success";
+    this.errorsData = [];
+  }
+
+  @Action({commit: "SET_ERRORS"})
+  setErrors(errors: any) {
+    return errors;
+  }
+
+  @Action({commit: "SET_MESSAGE"})
+  setMessage(message: any) {
+    return message;
+  }
+
+  @Action({commit: "SET_COLOR"})
+  setColor(color: any) {
+    return color;
+  }
+
+  @Action({})
+  setAlert(data: any) {
+    this.messageData = data.message;
+    this.colorData = data.color;
+    this.errorsData = data.errors;
+  }
+
+  @Action({})
+  resetState() {
+    this.messageData = "";
+    this.colorData = "success";
+    this.errorsData = [];
+  }
 }
 
-const getters = {
-  errors: state => state.errors,
-  message: state => state.message,
-  color: state => state.color
-};
-
-const actions = {
-  setErrors({ commit }, errors) {
-    commit("SET_ERRORS", errors);
-  },
-  setMessage({ commit }, message) {
-    commit("SET_MESSAGE", message);
-  },
-  setColor({ commit }, color) {
-    commit("SET_COLOR", color);
-  },
-  setAlert({ commit }, data) {
-    commit("SET_MESSAGE", data.message);
-    commit("SET_COLOR", data.color);
-    commit("SET_ERRORS", data.errors);
-  },
-  resetState({ commit }) {
-    commit("RESET_ALERT");
-  }
-};
-const mutations = {
-  SET_MESSAGE(state, message) {
-    state.message = message;
-  },
-  SET_COLOR(state, color) {
-    state.color = color;
-  },
-  SET_ERRORS(state, errors) {
-    state.errors = errors;
-  },
-  // eslint-disable-next-line no-unused-vars
-  RESET_ALERT(state) {
-    state = Object.assign(state, initAlert());
-  }
-};
-
-export default {
-  namespaced: true,
-  state: initAlert(),
-  getters,
-  actions,
-  mutations
-};
+const alertStore = getModule(AlertStore);
+export default alertStore;

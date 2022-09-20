@@ -1,171 +1,191 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
-function getPermissionID(array) {
-  const permission = [];
-  if (array) {
-    array.forEach(v => permission.push(v.id));
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import alertStore from '../alert';
+import roleIndexStore from '.';
+
+@Module({dynamic:true, name:"roleSingleStore", store, namespaced: true})
+class RoleSingleStore extends VuexModule {
+  roleState: any = {
+    id: "",
+    name: "",
+    permission: []
+  };
+
+  permissionsAllState: any = [];
+
+  fetchingState: any = false;
+
+  get role(): any {
+    return this.roleState;
   }
-  return permission;
-}
-function initState() {
-  return {
-    role: {
+
+  get fetching(): any {
+    return this.fetchingState;
+  }
+
+  get permissionsAll(): any {
+    return this.permissionsAllState;
+  }
+
+  @Mutation
+  SET_FETCHING(stus: any) {
+    this.fetchingState = stus;
+  }
+
+  @Mutation
+  UPDATE_NAME(name: any) {
+    this.role.name= name;
+  }
+
+  @Mutation
+  UPDATE_PERMISSION(permission: any) {
+    this.role.permission = permission;
+  }
+
+  @Mutation
+  SET_PERMISSIONS_ALL(all: any) {
+    this.permissionsAllState = all;
+  }
+
+  @Mutation
+  SET_ROLE(role: any) {
+    this.roleState = role;
+  }
+
+  @Mutation
+  INIT_STATE() {
+    this.roleState = {
       id: "",
       name: "",
       permission: []
-    },
-    permissionsAll: [],
-    fetching: false
-  };
-}
+    };
+    this.permissionsAllState = [];
+    this.fetchingState = false;
+  }
 
-const getters = {
-  role: state => state.role,
-  fetching: state => state.fetching,
-  permissionsAll: state => state.permissionsAll
-};
-
-const actions = {
-  fetch({ commit, dispatch, state }) {
+  @Action
+  fetch() {
     apiURL
-      .get(`roles/${state.role.id}`, state.role)
+      .get(`roles/${this.roleState.id}`, this.roleState)
       .then(res => {
-        commit("SET_ROLE", res.data.data);
+        this.SET_ROLE(res.data.data);
       })
       .catch(err => {
-        const { errors, message } = err.response.data;
-        dispatch("Alert/setAlert", { errors, message, color: "danger" });
+        let { errors, message } = err.response.data;
+        alertStore.setAlert({ errors, message, color: "danger" })
       });
-    dispatch("fetchPermisisonsAll");
-  },
-  fetchPermisisonsAll({ commit, dispatch }) {
+      this.fetchPermisisonsAll();
+  }
+  
+  @Action
+  fetchPermisisonsAll() {
     apiURL
       .get("permissions", { params: { showData: true } })
       .then(({ data }) => {
-        commit("SET_PERMISSIONS_ALL", data);
+        this.SET_PERMISSIONS_ALL(data);
       })
       .catch(({ response }) =>
-        dispatch(
-          "Alert/setAlert",
-          { errors: response.data, message: response.data, color: "danger" },
-          { root: true }
-        )
+        alertStore.setAlert({ errors: response.data, message: response.data, color: "danger" })
       );
-  },
-  store({ commit, dispatch, state }) {
-    commit("SET_FETCHING", true);
-    const role = {
-      ...state.role,
-      permission: getPermissionID(state.role.permission)
+  }
+  
+  @Action
+  store() {
+    this.SET_FETCHING(true);
+    let role = {
+      ...this.roleState,
+      permission: getPermissionID(this.roleState.permission)
     };
     return new Promise((resolve, reject) => {
       apiURL
         .post("roles", role)
         .then(res => {
-          dispatch("RoleIndex/fetchData", null, { root: true });
+          roleIndexStore.fetchData();
           resolve(res);
         })
         .catch(err => {
           const { errors, message } = err.reponse.data;
-          dispatch(
-            "Alert/setAlert",
-            { errors, message, color: "danger" },
-            { root: true }
-          );
+         alertStore.setAlert({ errors, message, color: "danger" })
           reject(err);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.SET_FETCHING(false));
     });
-  },
-  update({ commit, dispatch, state }) {
-    commit("SET_FETCHING", true);
-    const role = {
-      ...state.role,
-      permission: getPermissionID(state.role.permission)
+  }
+  
+  @Action
+  update() {
+    this.SET_FETCHING(true);
+    let role = {
+      ...this.roleState,
+      permission: getPermissionID(this.roleState.permission)
     };
     return new Promise((resolve, reject) => {
       apiURL
-        .put(`roles/${state.role.id}`, role)
+        .put(`roles/${this.roleState.id}`, role)
         .then(res => {
-          dispatch("RoleIndex/fetchData", null, { root: true });
+          roleIndexStore.fetchData(); 
           resolve(res);
         })
         .catch(err => {
           const { errors, message } = err.reponse.data;
-          dispatch(
-            "Alert/setAlert",
-            { errors, message, color: "danger" },
-            { root: true }
-          );
+         alertStore.setAlert({ errors, message, color: "danger" })
           reject(err);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.SET_FETCHING(false));
     });
-  },
-  delete({ commit, dispatch, state }) {
-    commit("SET_FETCHING", true);
-    const role = {
-      ...state.role,
-      permission: getPermissionID(state.role.permission)
+  }
+
+  @Action
+  delete() {
+    this.SET_FETCHING(true);
+    let role = {
+      ...this.roleState,
+      permission: getPermissionID(this.roleState.permission)
     };
     return new Promise((resolve, reject) => {
       apiURL
-        .delete(`roles/${state.role.id}`, role)
+        .delete(`roles/${this.roleState.id}`, role)
         .then(res => {
-          dispatch("RoleIndex/fetchData", null, { root: true });
+          roleIndexStore.fetchData(); 
           resolve(res);
         })
         .catch(err => {
           const { errors, message } = err.reponse.data;
-          dispatch(
-            "Alert/setAlert",
-            { errors, message, color: "danger" },
-            { root: true }
-          );
+          alertStore.setAlert({ errors, message, color: "danger" })
           reject(err);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.SET_FETCHING(false));
     });
-  },
-  updateName({ commit }, name) {
-    commit("UPDATE_NAME", name);
-  },
-  updatePermission({ commit }, per) {
-    commit("UPDATE_PERMISSION", per);
-  },
-  setRole({ commit }, role = { id: "", name: "", permission: [] }) {
-    commit("SET_ROLE", role);
-  },
-  resetState({ commit }) {
-    commit("INIT_STATE");
   }
-};
-
-const mutations = {
-  SET_FETCHING(state, stus) {
-    state.fetching = stus;
-  },
-  UPDATE_NAME(state, name) {
-    state.role.name = name;
-  },
-  UPDATE_PERMISSION(state, permission) {
-    state.role.permission = permission;
-  },
-  SET_PERMISSIONS_ALL(state, all) {
-    state.permissionsAll = all;
-  },
-  SET_ROLE(state, role) {
-    state.role = role;
-  },
-  // eslint-disable-next-line no-unused-vars
-  INIT_STATE(state) {
-    state = Object.assign(state, initState());
+  
+  @Action
+  updateName(name: any) {
+    this.UPDATE_NAME(name);
   }
-};
 
-export default {
-  namespaced: true,
-  state: initState(),
-  getters,
-  actions,
-  mutations
-};
+  @Action
+  updatePermission(per: any) {
+    this.UPDATE_PERMISSION(per);
+  }
+
+  @Action
+  setRole(role: any = { id: "", name: "", permission: [] }) {
+    this.SET_ROLE(role);
+  }
+
+  @Action
+  resetState() {
+    this.INIT_STATE;
+  }
+}
+function getPermissionID(array: any[]) {
+  let permission: any = [];
+  if (array) {
+    array.forEach(v => permission.push(v.id));
+  }
+  return permission;
+}
+
+const roleSingleStore = getModule(RoleSingleStore);
+export default roleSingleStore;

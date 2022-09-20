@@ -8,12 +8,12 @@ export const apiURL = axios.create({
     Authorization: token
   }
 });
-export const getIndex = (array, key, value) => {
+export const getIndex = (array: [], key: any, value: any) => {
   return array.findIndex(i => i[key] == value);
 };
 
 export const convertObjectToFormData = (
-  val,
+  val: any,
   formData = new FormData(),
   namespace = ""
 ) => {
@@ -51,7 +51,7 @@ export const convertObjectToFormData = (
   return formData;
 };
 
-export const convertArrayToFormData = (form_data, values, name) => {
+export const convertArrayToFormData = (form_data: FormData, values: any, name: string) => {
   if (!values && name) form_data.append(name, "");
   else {
     if (typeof values == "object") {

@@ -1,48 +1,74 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
-function initState() {
-    return {
-        notifications: [],
-        loading: false,
-        unreadNotifications: [],
-    };
-}
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 
-const getters = {
-    notifications: state => state.notifications,
-    unreadNotifications: state => state.unreadNotifications,
-};
+@Module({name:"notificationStore", dynamic: true, store, namespaced: true})
+class NotificationStore extends VuexModule {
+    notificationsState: any =  [];
 
-const actions = {
-    fetchNotifications({ commit }) {
-        commit("SET_LOADING", true);
+    loadingState: any =  false;
+
+    unreadNotificationsState: any =  [];
+
+    get notifications(): any {
+        return this.notificationsState;
+    }
+    get unreadNotifications(): any {
+        return this.unreadNotificationsState;
+    }
+
+    @Mutation
+    SET_ALL(data: any) {
+        this.notificationsState = data.notifications
+        this.unreadNotificationsState = data.unreadNotifications
+    }
+
+    @Mutation
+    SET_LOADING(stat: any) {
+        this.loadingState = stat
+    }
+
+    @Mutation
+    INIT_STATE() {
+        this.notificationsState = [];
+        this.unreadNotificationsState = [];
+        this.loadingState = false;
+    }
+
+    @Action({})
+    fetchNotifications() {
+        this.loadingState = true;
         return new Promise((resolve, reject) => {
             return apiURL
                 .get("/notifications")
                 .then(({ data }) => {
-                    commit("SET_ALL", data);
+                    this.SET_ALL(data);
                     resolve(data);
                 })
                 .catch(err => {
                     reject(err.response);
                 })
-                .finally(() => commit("SET_LOADING", false));
+                .finally(() => this.loadingState = false);
         })
-    },
-    unread({ commit },notify){
+    }
+
+    @Action({})
+    unread(notify: any){
         return new Promise((resolve, reject) => {
             return apiURL
                 .get(`/unread/${notify.id}/${notify.notifiable_id}`)
                 .then(({ data }) => {
-                    commit("SET_ALL", data);
+                    this.SET_ALL(data);
                     resolve(data);
                 })
                 .catch(err => {
                     reject(err.response);
                 })
         })
-    },
-    delete(context,data){
-        console.log(data);
+    }
+
+    @Action({})
+    delete(data: any){
         return new Promise((resolve, reject) => {
             return apiURL
                 .delete(`/deleteNotify/${data.user_id}/${data.notify.id}`)
@@ -54,26 +80,7 @@ const actions = {
                 })
         })
     }
-};
+}
 
-const mutations = {
-    SET_ALL(state, data) {
-        state.notifications = data.notifications
-        state.unreadNotifications = data.unreadNotifications
-    },
-    SET_LOADING(state, stat) {
-        state.loading = stat
-    },
-    // eslint-disable-next-line no-unused-vars
-    INIT_STATE(state) {
-        state = Object.assign(state, initState());
-    }
-};
-
-export default {
-    namespaced: true,
-    state: initState(),
-    getters,
-    actions,
-    mutations
-};
+const notificationStore = getModule(NotificationStore);
+export default notificationStore;

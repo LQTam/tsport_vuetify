@@ -1,81 +1,107 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 
-function initState() {
-  return {
-    permissions: {
-      meta: {
-        last_page: 1,
-        current_page: 1,
-        total: 0
-      }
-    },
-    query: {
-      length: 10,
-      dir: "desc",
-      column: 0,
-      search: "",
-      page: 1
-    },
-    fetching: false
-  };
-}
+@Module({dynamic: true, name:'permissionIndexStore', store, namespaced: true})
+class PermissionIndexStore extends VuexModule {
+  permissionsState: any =  {
+    meta: {
+      last_page: 1,
+      current_page: 1,
+      total: 0
+    }
+  }
 
-const getters = {
-  permissions: state => state.permissions,
-  query: state => state.query,
-  fetching: state => state.fetching
-};
+  queryState: any =  {
+    length: 10,
+    dir: "desc",
+    column: 0,
+    search: "",
+    page: 1
+  }
 
-const actions = {
-  fetchData({ commit, state }, query = null) {
-    commit("SET_FETCHING", true);
+  fetchingState: any =  false
+
+  get permissions(): any {
+    return this.permissionsState;
+  }
+
+  get query(): any {
+    return this.queryState;
+  }
+
+  get fetching(): any {
+    return this.fetchingState;
+  }
+
+  fetchData(query = null) {
+    this.SET_FETCHING(true);
     return new Promise((resolve, reject) => {
       return apiURL
         .get(
           "permissions",
-          query != null ? { params: query } : { params: state.query }
+          query != null ? { params: query } : { params: this.queryState }
         )
         .then(res => {
           const { data, meta, links } = res.data;
-          commit("SET_ALL", { meta, links, data });
+          this.SET_ALL({ meta, links, data })
           resolve(res.data);
         })
         .catch(err => {
           reject(err.response);
         })
         .finally(() => {
-          commit("SET_FETCHING", false);
+          this.SET_FETCHING(false);
         });
     });
-  },
-  setQuery({ commit }, query) {
-    commit("SET_QUERY", query);
-  },
-  resetState({ commit }) {
-    commit("INIT_STATE");
   }
-};
 
-const mutations = {
-  SET_ALL(state, data) {
-    state.permissions = data;
-  },
-  SET_FETCHING(state, stus) {
-    state.fetching = stus;
-  },
-  SET_QUERY(state, query) {
-    state.query = query;
-  },
-  // eslint-disable-next-line no-unused-vars
-  INIT_STATE(state) {
-    state = Object.assign(state, initState());
+  @Action
+  setQuery(query: any) {
+    this.SET_QUERY(query);
   }
-};
+  
+  @Action
+  resetState() {
+    this.INIT_STATE;
+  }
 
-export default {
-  namespaced: true,
-  state: initState(),
-  getters,
-  actions,
-  mutations
-};
+  @Mutation
+  SET_ALL(data: any) {
+    this.permissionsState = data;
+  }
+
+  @Mutation
+  SET_FETCHING(stus: any) {
+    this.fetchingState = stus;
+  }
+
+  @Mutation
+  SET_QUERY(query: any) {
+    this.queryState = query;
+  }
+  
+  @Mutation
+  INIT_STATE() {
+    this.permissionsState =  {
+      meta: {
+        last_page: 1,
+        current_page: 1,
+        total: 0
+      }
+    }
+  
+    this.queryState =  {
+      length: 10,
+      dir: "desc",
+      column: 0,
+      search: "",
+      page: 1
+    }
+  
+    this.fetchingState =  false
+  }
+}
+
+const permissionIndexStore = getModule(PermissionIndexStore);
+export default permissionIndexStore;

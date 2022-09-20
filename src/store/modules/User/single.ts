@@ -1,33 +1,84 @@
+import { UserResource, RoleResource, CustomerResource, SupplierResource } from './../../../models/index';
 import {
   apiURL,
   convertObjectToFormData
 } from "@/utils";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import store from "@/store";
+import alertStore from '../alert';
+import userIndexStore from '.';
 
-function initState() {
-  return {
-    user: {
-      id: "",
+@Module({ namespaced: true, dynamic: true, store, name: 'userSingleStore' })
+class UserSingleStore extends VuexModule {
+  userResource!: UserResource;
+
+  roleCollection: RoleResource[] = [];
+
+  loading: boolean = false;
+
+  get user(): UserResource {
+    return this.userResource;
+  }
+
+  get isLoading(): boolean {
+    return this.loading;
+  }
+
+  get rolesAll(): RoleResource[] {
+    return this.roleCollection;
+  }
+
+  @Mutation
+  SET_USER(user: UserResource) {
+    this.userResource = user;
+  }
+
+  @Mutation
+  UPDATE_PASSWORD(pass: string) {
+    this.userResource.password = pass;
+  }
+
+  @Mutation
+  SET_FETCHING(value: boolean) {
+    this.loading = value;
+  }
+
+  @Mutation
+  SET_ROLES_ALL(data: RoleResource[]) {
+    this.roleCollection = data;
+  }
+
+  @Mutation
+  INIT_STATE() {
+    this.userResource = {
+      id: 0,
+      name: "",
       email: "",
       password: "",
-      name: "",
-
       role: []
-    },
-    rolesAll: [],
-    loading: false
-  };
-}
+    }
+    this.loading = false;
+    this.roleCollection = [];
+  }
 
-const getters = {
+  @Mutation
+  UPDATE_EMAIL(email: string) {
+    this.userResource.email = email;
+  }
 
-  user: state => state.user,
-  loading: state => state.loading,
-  rolesAll: state => state.rolesAll
-};
+  @Mutation
+  UPDATE_ROLE(role: []) {
+    this.userResource.role = role;
+  }
 
-const actions = {
-  updateUserProfile(context, data) {
-    const formData = new FormData();
+  @Mutation
+  UPDATE_NAME(name: string) {
+    this.userResource.name = name;
+  }
+
+  @Action({})
+  updateUserProfile(data: UserResource) {
+    let formData = new FormData();
     convertObjectToFormData(data, formData);
 
     formData.append("_method", 'put')
@@ -44,9 +95,11 @@ const actions = {
           response
         }) => reject(response))
     })
-  },
-  updateCustomerProfile(context, data) {
-    const formData = new FormData();
+  }
+
+  @Action({})
+  updateCustomerProfile(data: CustomerResource) {
+    let formData = new FormData();
     convertObjectToFormData(data, formData);
 
     formData.append("_method", 'put')
@@ -61,9 +114,11 @@ const actions = {
           response
         }) => reject(response))
     })
-  },
-  updateSupplierProfile(context, data) {
-    const formData = new FormData();
+  }
+
+  @Action({})
+  updateSupplierProfile(data: SupplierResource) {
+    let formData = new FormData();
     convertObjectToFormData(data, formData)
     formData.append('_method', 'put')
     return new Promise((resolve, reject) => {
@@ -77,40 +132,34 @@ const actions = {
           response
         }) => reject(response))
     })
+  }
 
-  },
-  loginUser({
-    commit
-  }, user) {
-    commit("SET_LOADING", true);
+  @Action({})
+  loginUser(user: UserResource) {
+    this.loading = true;
     return new Promise((resolve, reject) => {
       return apiURL
         .post("auth/login", user)
-
         .then(res => {
-
-          commit("SET_USER", res.data.user);
+          this.SET_USER(res.data.user);
           sessionStorage.setItem("user", JSON.stringify(res.data.user));
           sessionStorage.setItem("authToken", res.data.access_token);
           sessionStorage.setItem("userLoggedIn", "logged");
 
-          const d = new Date()
+          let d = new Date()
           d.setHours(d.getHours() + (res.data.expires_in / 60 / 60))
-          sessionStorage.setItem("expires_in", d);
+          sessionStorage.setItem("expires_in", d.toString());
           resolve(res);
-        })
+        })  
         .catch(err => {
-          console.log(err);
-
           reject(err);
         })
-        .finally(() => commit("SET_LOADING", false));
+        .finally(() => this.loading = false);
     });
-  },
-  registerUser({
-    commit
-  }, user) {
-    commit("SET_LOADING", true);
+  }
+
+  registerUser(user: UserResource) {
+    this.loading = true;
     return new Promise((resolve, reject) => {
       return apiURL
         .post("register", user)
@@ -124,17 +173,13 @@ const actions = {
         }) => {
           reject(response);
         })
-        .finally(() => commit("SET_LOADING", false));
+        .finally(() => this.loading = false);
     });
-  },
-  // eslint-disable-next-line no-unused-vars
-  fetch({
-    commit,
-    dispatch
-  }, user) {
-    dispatch("Alert/resetState", null, {
-      root: true
-    });
+  }
+
+  @Action({})
+  fetch(user: UserResource) {
+    alertStore.resetState();
     return new Promise((resolve, reject) => {
       apiURL
         .get(`users/${user.id}`)
@@ -144,149 +189,124 @@ const actions = {
           }
         }) => {
 
-          commit("SET_USER", data)
-          dispatch("fetchRolesAll");
+          this.setUser(data);
+          this.fetchRolesAll();
           resolve(data)
         })
         .catch(err => reject(err));
     })
 
-  },
-  fetchRolesAll({
-    commit
-  }) {
+  }
+
+  @Action({commit: "SET_ROLES_ALL"})
+  fetchRolesAll() {
     apiURL
       .get("roles", {
         params: {
           showData: true
         }
       })
-
       .then(res => {
-        commit("SET_ROLES_ALL", res.data);
+        return res.data;
       })
       .catch(err => console.log(err));
-  },
-  store({
-    dispatch,
-    commit
-  }, user) {
-    commit("SET_FETCHING", true);
-    dispatch("Alert/resetState", null, {
-      root: true
-    });
+  }
+
+  @Action({})
+  store(user: UserResource) {
+    this.loading = true;
+    alertStore.resetState();
 
     return new Promise((resolve, reject) => {
       apiURL
         .post("users", user)
-
         .then(res => {
-          dispatch("UserIndex/fetchData", null, {
-            root: true
-          });
+          userIndexStore.fetchData();
           resolve(res);
         })
         .catch(error => {
-
-          const message = error.response.data.message || error.message;
-          const errors = error.response.data.errors;
-          dispatch(
-            "Alert/setAlert", {
-              message,
-              errors,
-              color: "danger"
-            }, {
-              root: true
-            }
-          );
+          let message = error.response.data.message || error.message;
+          let errors = error.response.data.errors;
+          alertStore.setAlert({
+            message,
+            errors,
+            color: "danger"
+          });
           reject(error.response);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.loading = false);
     });
-  },
+  }
 
+  @Action({})
   me() {
     return new Promise((resolve, reject) => {
-
       apiURL.post('auth/me')
         .then(({
           data
         }) => resolve(data))
         .catch((response) => reject(response))
     })
-  },
+  }
 
-  update({
-    commit,
-    dispatch
-  }, user) {
-    commit("SET_FETCHING", true);
+  @Action({})
+  update(user: UserResource) {
+    this.loading = true;
     return new Promise((resolve, reject) => {
       apiURL
         .put(`users/${user.id}`, user)
-
         .then(res => {
-          dispatch("UserIndex/fetchData", null, {
-            root: true
-          });
+          userIndexStore.fetchData();
           resolve(res);
         })
         .catch(err => {
-          const message = err.response.data.message || err.message;
-          const errors = err.response.data.errors;
-          dispatch(
-            "Alert/setAlert", {
-              message,
-              errors,
-              color: "danger"
-            }, {
-              root: true
-            }
-          );
+          let message = err.response.data.message || err.message;
+          let errors = err.response.data.errors;
+          alertStore.setAlert({
+            message,
+            errors,
+            color: "danger"
+          });
           reject(err);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.loading = false);
     });
-  },
-  delete({
-    commit,
-    dispatch
-  }, user) {
-    commit("SET_FETCHING", true);
+  }
+
+  @Action({})
+  delete(user: UserResource) {
+    this.loading = true;
     return new Promise((resolve, reject) => {
       apiURL
-        .delete(`users/${user.id}`, user)
+        .delete(`users/${user.id}`, { data: user})
 
         .then(res => {
-          dispatch("UserIndex/fetchData", null, {
-            root: true
-          });
+          userIndexStore.fetchData();
           resolve(res);
         })
         .catch(err => {
-          const {
+          let {
             errors,
             message
           } = err.reponse.data;
-          dispatch("Alert/setAlert", {
+          alertStore.setAlert({
             errors,
             message,
             color: "danger"
           });
           reject(err);
         })
-        .finally(() => commit("SET_FETCHING", false));
+        .finally(() => this.loading = false);
     });
-  },
-  logout({
-    commit
-  }) {
+  }
+
+  @Action({})
+  logout() {
     return new Promise((resolve, reject) => {
       return apiURL
         .get("auth/logout")
-
         .then(res => {
-          commit("INIT_STATE");
+          this.INIT_STATE;
           sessionStorage.removeItem("authToken");
           sessionStorage.removeItem("user");
           sessionStorage.removeItem("userLoggedIn");
@@ -297,83 +317,46 @@ const actions = {
         })
         .catch(err => reject(err.response));
     });
-  },
-  resetState({
-    commit
-  }) {
-    commit("INIT_STATE");
-  },
-  setUser({
-      commit
-    },
-    user = {
-      id: "",
+  }
+
+  @Action({})
+  resetState() {
+    this.INIT_STATE;
+  }
+
+  @Action({})
+  setUser(
+    user: UserResource = {
+      id: 0,
       email: "",
       password: "",
       name: "",
-
       role: []
     }
   ) {
-    commit("SET_USER", user);
-  },
-  updateRole({
-    commit
-  }, role) {
-    commit("UPDATE_ROLE", role);
-  },
-  updateName({
-    commit
-  }, name) {
-    commit("UPDATE_NAME", name);
-  },
-  updateEmail({
-    commit
-  }, email) {
-    commit("UPDATE_EMAIL", email);
-  },
-  updatePassword({
-    commit
-  }, password) {
-    commit("UPDATE_PASSWORD", password);
-
+    this.SET_USER(user);
   }
-};
 
-const mutations = {
-  SET_USER(state, user) {
-    state.user = user;
-  },
-  UPDATE_PASSWORD(state, pass) {
-    state.user.password = pass;
-  },
-  SET_FETCHING(state, value) {
-    state.loading = value;
-  },
-  SET_ROLES_ALL(state, data) {
-    state.rolesAll = data;
-  },
-  // eslint-disable-next-line no-unused-vars
-  INIT_STATE(state) {
-    state = Object.assign(state, initState());
-  },
-  UPDATE_EMAIL(state, email) {
-    state.user.email = email;
-  },
-  UPDATE_ROLE(state, role) {
-    state.user.role = role;
-  },
-  UPDATE_NAME(state, name) {
-    state.user.name = name;
-
+  @Action({})
+  updateRole(role: any) {
+    this.UPDATE_ROLE(role);
   }
-};
 
-export default {
-  namespaced: true,
-  state: initState(),
-  getters,
-  actions,
+  @Action({commit: "UPDATE_NAME"})
+  updateName(name: string) {
+    return name;
+  }
 
-  mutations
-};
+  @Action({commit: "UPDATE_EMAIL"})
+  updateEmail(email: string) {
+    return email;
+  }
+
+  @Action({commit: "UPDATE_EMAIL"})
+  updatePassword(password: string) {
+    return password;
+  }
+}
+
+const userSingleStore = getModule(UserSingleStore);
+export default userSingleStore;

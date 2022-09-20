@@ -1,47 +1,62 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import alertStore from '../alert';
 
-function initState() {
-  return {
-    products: [],
-    relatedProducts: [],
-    fetching: false,
-    product: {},
-    sizesAll: [],
-  };
-}
+@Module({dynamic: true, name: 'homeProductStore', store, namespaced: true})
+class HomeProductStore extends VuexModule {
+  productsState: any = [];
 
-const getters = {
-  products: state => state.products,
-  product: state => state.product,
-  relatedProducts: state => state.relatedProducts,
-  sizesAll: state => state.sizesAll,
-};
+  relatedProductsState: any = [];
 
-const actions = {
-  fetchData({ commit, state }, query = null) {
-    commit("SET_FETCHING", true);
+  fetchingState: any = false;
+
+  productState: any = {};
+
+  sizesAllState: any = [];
+
+  get products(): any {
+    return this.productsState;
+  }
+
+  get product(): any {
+    return this.productState;
+  }
+
+  get relatedProducts(): any {
+    return this.relatedProductsState;
+  }
+
+  get sizesAll(): any {
+    return this.sizesAllState;
+  }
+
+  @Action
+  fetchData(query = null) {
+    this.SET_FETCHING(true);
     return new Promise((resolve, reject) => {
       return apiURL
         .get(
           "getAllProducts",
-          // { params: state.query },
-          query != null ? { params: query } : { params: state.query }
+          { params: query }
         )
         .then(res => {
           const data = res.data;
-          commit("SET_ALL", data);
+          this.SET_ALL(data);
           resolve(data);
         })
         .catch(err => {
-          commit("SET_ALERT", err.response);
+          alertStore.setAlert(err.response);
           reject(err.response);
         })
         .finally(() => {
-          commit("SET_FETCHING", false);
+          this.SET_FETCHING(false);
         });
     });
-  },
-  filterProductsBySize({ commit }, query) {
+  }
+
+  @Action
+  filterProductsBySize(query:any) {
     return new Promise((resolve, reject) => {
       return apiURL
         .get(
@@ -50,15 +65,17 @@ const actions = {
         )
         .then(({ data }) => {
           console.log(data);
-          commit("SET_ALL", data);
+          this.SET_ALL(data);
           resolve(data);
         })
         .catch(({ response }) => {
           reject(response);
         })
     });
-  },
-  filterProductsByKeyWord({commit},data){
+  }
+  
+  @Action
+  filterProductsByKeyWord(data:any){
     return new Promise((resolve, reject) => {
       return apiURL
         .get(
@@ -67,34 +84,40 @@ const actions = {
         )
         .then(({ data }) => {
           console.log(data);
-          commit("SET_ALL", data);
+          this.SET_ALL(data);
           resolve(data);
         })
         .catch(({ response }) => {
           reject(response);
         })
     });
-  },
-  fetchSizesAll({ commit }) {
+  }
+  
+  @Action
+  fetchSizesAll(){
     apiURL.get('sizes')
       .then(({ data }) => {
-        commit("SET_SIZE_ALL", data)
+        this.SET_SIZE_ALL(data)
       })
       .catch(({ response }) => {
         console.log(response);
       })
-  },
-  fetch({ commit }, id) {
+  }
+  
+  @Action
+  fetch(id:any) {
     return new Promise((resolve, reject) => {
       apiURL.get(`getProduct/${id}`)
         .then(({ data: { data } }) => {
-          commit("SET_PRODUCT", data)
+          this.SET_PRODUCT(data)
           resolve(data)
         })
         .catch(({ response }) => reject(response))
     })
-  },
-  fetchProdsByKey(context,query){
+  }
+  
+  @Action
+  fetchProdsByKey(query:any){
     return new Promise((resolve,reject)=>{
       apiURL.get(`fetchProdsByKey`,{params:query})
       .then(({data})=> {
@@ -102,42 +125,52 @@ const actions = {
       })
       .catch(({response})=>reject(response.data))
     })
-  },
-  fetchRelatedProducts({ commit }, id) {
+  }
+  
+  @Action
+  fetchRelatedProducts(id:any) {
     apiURL.get(`getRelatedProducts/${id}`)
       .then(({ data: { data } }) => {
-        commit("SET_RELATED_PRODUCTS", data)
+        this.SET_RELATED_PRODUCTS(data)
       })
       .catch(({ response }) => console.log(response))
   }
-};
-
-const mutations = {
-  SET_ALL(state, data) {
-    state.products = data;
-  },
-  SET_SIZE_ALL(state, sizesAll) {
-    state.sizesAll = sizesAll
-  },
-  SET_FETCHING(state, stus) {
-    state.fetching = stus
-  },
-  SET_PRODUCT(state, product) {
-    state.product = product
-  },
-  SET_RELATED_PRODUCTS(state, relProds) {
-    state.relatedProducts = relProds
-  },
-  // eslint-disable-next-line no-unused-vars
-  INIT_STATE(state) {
-    state = Object.assign(state, initState());
+  
+  @Mutation
+  SET_ALL(data:any) {
+    this.productsState = data;
   }
-};
+  
+  @Mutation
+  SET_SIZE_ALL(sizesAll:any) {
+    this.sizesAllState = sizesAll
+  }
 
-export default {
-  namespaced: true,
-  state: initState(),
-  getters,
-  actions,
-  mutations
-};
+  @Mutation
+  SET_FETCHING(stus:any) {
+    this.fetchingState = stus
+  }
+  
+  @Mutation
+  SET_PRODUCT(product:any) {
+    this.productState = product
+  }
+  
+  @Mutation
+  SET_RELATED_PRODUCTS(relProds:any) {
+    this.relatedProductsState = relProds
+  }
+  
+  @Mutation
+  INIT_STATE() {
+    this.productsState = [];
+    this.relatedProductsState = [];
+    this.fetchingState = false;
+    this.productState = {};
+    this.sizesAllState= [];
+  }
+}
+
+const homeProductStore = getModule(HomeProductStore);
+
+export default homeProductStore;

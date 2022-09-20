@@ -1,38 +1,44 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import { convertObjectToFormData } from "../../../../utils";
+import productSingleStore from '../single';
 
-function initState() {
-  return {
-    picture:{},
-    fetching: false,
-  };
-}
+@Module({dynamic: true, name: "pictureStore", store, namespaced: true})
+class PictureStore extends VuexModule {
+  pictureState: any = {};
 
-const getters = {
-  picture: state => state.picture,
-};
+  fetchingState: any =  false;
 
-const actions = {
-  fetch({commit},data){
+  get picture(): any {
+    return this.picture;
+  }
+
+  @Action
+  fetch(data: any){
     apiURL.get(`products/${data.product_id}/colors/${data.color_id}`)
     .then(({data:{data}})=>{
-        commit('SET_PICTURE',data)
+        this.SET_PICTURE(data);
     })
     .catch(({response})=>console.log(response))
-  },
-  addImageForColorProduct({dispatch},product){
-    const formData = new FormData()
+  }
+  
+  @Action
+  addImageForColorProduct(product: any){
+    let formData = new FormData()
     convertObjectToFormData(product,formData)
     return new Promise((resolve,reject)=>{
       apiURL.post(`products/${product.id}/colors/${product.color_name.id}`,formData)
       .then(({data})=> {
-        dispatch("ProductSingle/fetch",product,{root:true})
+        productSingleStore.fetch(product);
         resolve(data)
       })
       .catch(({response})=>reject(response))
     });
-  },
-  deleteSelectedItem(context,data){
+  }
+  
+  @Action
+  deleteSelectedItem(data: any){
     return new Promise((resolve,reject)=>{
       apiURL.post('colorpicture/deleteSelectedItem',data)
       .then(({data})=>{
@@ -40,26 +46,24 @@ const actions = {
       })
       .catch(({response})=>reject(response))
     })
-  },
-  resetState({ commit }) {
-    commit("INIT_STATE");
   }
-};
-
-const mutations = {
-  SET_PICTURE(state,pic){
-      state.picture = pic
-  },
-  // eslint-disable-next-line no-unused-vars
-  INIT_STATE(state) {
-    state = Object.assign(state, initState());
+  
+  @Action
+  resetState() {
+    this.INIT_STATE;
   }
-};
 
-export default {
-  namespaced: true,
-  state: initState(),
-  getters,
-  actions,
-  mutations
-};
+  @Mutation
+  SET_PICTURE(pic: any){
+    this.pictureState = pic
+  }
+
+  @Mutation
+  INIT_STATE() {
+    this.pictureState = {};
+    this.fetchingState =  false;
+  }
+}
+
+const pictureStore = getModule(PictureStore);
+export default pictureStore;

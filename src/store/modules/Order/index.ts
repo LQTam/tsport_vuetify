@@ -1,36 +1,47 @@
+import store from '@/store';
 import { apiURL } from "@/utils";
+import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
+import alertStore from '../alert';
 
-function initState() {
-    return {
-        orders: {
-            meta: {
-                last_page: 1,
-                current_page: 1,
-                total: 0
-            }
-        },
-        fetching: false,
-        sortKey: "id",
-        sortGroup: {},
-        query: {
-            length: 10,
-            page: 1,
-            column: 0,
-            dir: "desc",
-            search: ""
+@Module({dynamic: true, name: 'orderIndexStore', store, namespaced: true})
+class OrderIndexStore extends VuexModule {
+    ordersState: any = {
+        meta: {
+            last_page: 1,
+            current_page: 1,
+            total: 0
         }
-    };
-}
+    }
 
-const getters = {
-    orders: state => state.orders,
-    fetching: state => state.fetching,
-    query: state => state.query
-};
+    fetchingState: any = false
 
-const actions = {
-    fetchData({ commit }, query = null) {
-        commit("SET_FETCHING", true);
+    sortKeyState: any = "id"
+
+    sortGroupState: any = {}
+
+    queryState: any = {
+        length: 10,
+        page: 1,
+        column: 0,
+        dir: "desc",
+        search: ""
+    }
+
+    get orders(): any {
+        return this.ordersState;
+    }
+
+    get fetching(): any {
+        return this.fetchingState;
+    }
+
+    get query(): any {
+        return this.queryState;
+    }
+
+    @Action
+    fetchData(query = null) {
+        this.SET_FETCHING(true);
         return new Promise((resolve, reject) => {
             return apiURL
                 .get(
@@ -38,19 +49,21 @@ const actions = {
                     { params: query }
                 )
                 .then(({ data }) => {
-                    commit("SET_ALL", data);
+                    this.SET_ALL(data);
                     resolve(data);
                 })
                 .catch(err => {
-                    commit("SET_ALERT", err.response);
+                    alertStore.setAlert(err.response);
                     reject(err.response);
                 })
                 .finally(() => {
-                    commit("SET_FETCHING", false);
+                    this.SET_FETCHING(false);
                 });
         });
-    },
-    confirmOrder(context, data) {
+    }
+
+    @Action
+    confirmOrder(data: any) {
         return new Promise((resolve, reject) => {
             return apiURL
                 .post(
@@ -63,16 +76,19 @@ const actions = {
                     reject(err.response);
                 })
         });
-    },
-    fetchOrdersByUserID(context, uid) {
+    }
+    @Action
+    fetchOrdersByUserID(uid:any) {
         return new Promise((resolve, reject) => {
             apiURL.get(`fetchOrders/${uid}`)
                 .then(({ data }) => resolve(data))
                 .catch(({ response }) => reject(response))
 
         })
-    },
-    outOfStock(context, data) {
+    }
+
+    @Action
+    outOfStock(data: any) {
         return new Promise((resolve, reject) => {
             return apiURL
                 .post(
@@ -85,47 +101,75 @@ const actions = {
                     reject(err.response);
                 })
         });
-    },
-    delete({ dispatch }, data) {
+    }
+
+    @Action
+    delete(data:any) {
         return new Promise((resolve, reject) => {
             return apiURL
                 .delete(
                     `delete/${data.madh}`,
                 )
                 .then(({ data }) => {
-                    dispatch("OrderIndex/fetchData", null, { root: true })
+                    this.fetchData();
                     resolve(data);
                 })
                 .catch(err => {
                     reject(err.response);
                 })
         });
-    },
-    setQuery({ commit }, query) {
-        commit("SET_QUERY", query);
-    },
-    resetState({ commit }) {
-        commit("INIT_STATE");
     }
-};
 
-const mutations = {
-    SET_ALL(state, data) {
-        state.orders = data;
-    },
-    SET_FETCHING(state, data) {
-        state.fetching = data;
-    },
-    // eslint-disable-next-line no-unused-vars
-    INIT_STATE(state) {
-        state = Object.assign(state, initState());
+    @Action
+    setQuery(query:any) {
+        this.SET_QUERY(query);
     }
-};
 
-export default {
-    namespaced: true,
-    state: initState(),
-    getters,
-    actions,
-    mutations
-};
+    @Action
+    resetState() {
+        this.INIT_STATE
+    }
+    
+    @Mutation
+    SET_ALL(data:any) {
+        this.ordersState = data;
+    }
+    @Mutation
+    SET_FETCHING(data:any) {
+        this.fetchingState = data;
+    }
+
+    @Mutation
+    SET_QUERY(data:any) {
+        this.queryState = data;
+    }
+
+    @Mutation
+    INIT_STATE() {
+        this.ordersState = {
+            meta: {
+                last_page: 1,
+                current_page: 1,
+                total: 0
+            }
+        }
+
+        this.fetchingState = false
+
+        this.sortKeyState = "id"
+
+        this.sortGroupState = {}
+
+        this.queryState = {
+            length: 10,
+            page: 1,
+            column: 0,
+            dir: "desc",
+            search: ""
+        }
+    }
+}
+
+const orderIndexStore = getModule(OrderIndexStore);
+
+export default orderIndexStore;
