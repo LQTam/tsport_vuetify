@@ -101,13 +101,13 @@ Vue.prototype.$eventHub = new Vue();
 Vue.prototype.$axios = require('axios');
 Vue.config.productionTip = false;
 if (sessionStorage.expires_in) {
-  let date = new Date(sessionStorage.expires_in);
-  let dateNotify = new Date(date);
+  const date = new Date(sessionStorage.expires_in);
+  const dateNotify = new Date(date);
   dateNotify.setMinutes(dateNotify.getMinutes() - 5);
   sessionStorage.setItem("notifyTokenExpireBefore5Minute", dateNotify);
   setInterval(() => {
-    let user = JSON.parse(sessionStorage.user)
-    let dateNow = new Date();
+    const user = JSON.parse(sessionStorage.user)
+    const dateNow = new Date();
     if (dateNow.getTime() > new Date(sessionStorage.expires_in).getTime()) {
       window.location.href = user.role_name.includes('admin') ? '/admin/logout' : '/user/logout'
       // window.location.href =  '/user/logout'
@@ -119,7 +119,7 @@ if (sessionStorage.expires_in) {
 
 new Vue({
   data() {
-    let user = sessionStorage.user ? JSON.parse(sessionStorage.user) : {}
+    const user = sessionStorage.user ? JSON.parse(sessionStorage.user) : {}
     return {
       user,
       permissions:[],
@@ -135,7 +135,7 @@ new Vue({
   },
   methods: {
     async fetchData() {
-      let data = await this.$store.dispatch("Rules/fetchData");
+      const data = await this.$store.dispatch("Rules/fetchData");
       this.permissions = data
       this.$eventHub.$emit("rules-update");
       // .then(() => this.$eventHub.$emit("rules-update"));

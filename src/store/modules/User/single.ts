@@ -27,7 +27,7 @@ const getters = {
 
 const actions = {
   updateUserProfile(context, data) {
-    let formData = new FormData();
+    const formData = new FormData();
     convertObjectToFormData(data, formData);
 
     formData.append("_method", 'put')
@@ -46,7 +46,7 @@ const actions = {
     })
   },
   updateCustomerProfile(context, data) {
-    let formData = new FormData();
+    const formData = new FormData();
     convertObjectToFormData(data, formData);
 
     formData.append("_method", 'put')
@@ -63,7 +63,7 @@ const actions = {
     })
   },
   updateSupplierProfile(context, data) {
-    let formData = new FormData();
+    const formData = new FormData();
     convertObjectToFormData(data, formData)
     formData.append('_method', 'put')
     return new Promise((resolve, reject) => {
@@ -94,7 +94,7 @@ const actions = {
           sessionStorage.setItem("authToken", res.data.access_token);
           sessionStorage.setItem("userLoggedIn", "logged");
 
-          let d = new Date()
+          const d = new Date()
           d.setHours(d.getHours() + (res.data.expires_in / 60 / 60))
           sessionStorage.setItem("expires_in", d);
           resolve(res);
@@ -188,8 +188,8 @@ const actions = {
         })
         .catch(error => {
 
-          let message = error.response.data.message || error.message;
-          let errors = error.response.data.errors;
+          const message = error.response.data.message || error.message;
+          const errors = error.response.data.errors;
           dispatch(
             "Alert/setAlert", {
               message,
@@ -232,8 +232,8 @@ const actions = {
           resolve(res);
         })
         .catch(err => {
-          let message = err.response.data.message || err.message;
-          let errors = err.response.data.errors;
+          const message = err.response.data.message || err.message;
+          const errors = err.response.data.errors;
           dispatch(
             "Alert/setAlert", {
               message,
@@ -264,7 +264,7 @@ const actions = {
           resolve(res);
         })
         .catch(err => {
-          let {
+          const {
             errors,
             message
           } = err.reponse.data;

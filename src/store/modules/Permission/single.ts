@@ -23,7 +23,7 @@ const actions = {
         commit("SET_PERMISSION", res.data.data);
       })
       .catch(err => {
-        let { errors, message } = err.response.data;
+        const { errors, message } = err.response.data;
         dispatch("Alert/setAlert", { errors, message, color: "danger" });
       });
   },

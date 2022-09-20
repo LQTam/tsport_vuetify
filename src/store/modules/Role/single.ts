@@ -1,6 +1,6 @@
 import { apiURL } from "@/utils";
 function getPermissionID(array) {
-  let permission = [];
+  const permission = [];
   if (array) {
     array.forEach(v => permission.push(v.id));
   }
@@ -32,7 +32,7 @@ const actions = {
         commit("SET_ROLE", res.data.data);
       })
       .catch(err => {
-        let { errors, message } = err.response.data;
+        const { errors, message } = err.response.data;
         dispatch("Alert/setAlert", { errors, message, color: "danger" });
       });
     dispatch("fetchPermisisonsAll");
@@ -53,7 +53,7 @@ const actions = {
   },
   store({ commit, dispatch, state }) {
     commit("SET_FETCHING", true);
-    let role = {
+    const role = {
       ...state.role,
       permission: getPermissionID(state.role.permission)
     };
@@ -78,7 +78,7 @@ const actions = {
   },
   update({ commit, dispatch, state }) {
     commit("SET_FETCHING", true);
-    let role = {
+    const role = {
       ...state.role,
       permission: getPermissionID(state.role.permission)
     };
@@ -103,7 +103,7 @@ const actions = {
   },
   delete({ commit, dispatch, state }) {
     commit("SET_FETCHING", true);
-    let role = {
+    const role = {
       ...state.role,
       permission: getPermissionID(state.role.permission)
     };

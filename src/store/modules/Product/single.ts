@@ -28,7 +28,7 @@ function initState() {
 
 // eslint-disable-next-line no-unused-vars
 function getIndex(array) {
-  let item = [];
+  const item = [];
   if (item) {
     array.forEach(v => item.push(v.id));
   }
@@ -125,7 +125,7 @@ const actions = {
           resolve(data);
         })
         .catch(err => {
-          let { errors, message } = err.reponse.data;
+          const { errors, message } = err.reponse.data;
           dispatch("Alert/setAlert", { errors, message, color: "danger" });
           reject(err);
         })

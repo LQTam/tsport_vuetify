@@ -1,5 +1,5 @@
 import axios from "axios";
-let token = sessionStorage.authToken
+const token = sessionStorage.authToken
   ? `Bearer ${sessionStorage.authToken}`
   : "";
 export const apiURL = axios.create({
@@ -30,7 +30,7 @@ export const convertObjectToFormData = (
           formData.append(namespace + "[]", val[i]);
         }
       } else {
-        for (let propertyName in val) {
+        for (const propertyName in val) {
           // eslint-disable-next-line no-prototype-builtins
           if (val.hasOwnProperty(propertyName)) {
             convertObjectToFormData(
@@ -55,7 +55,7 @@ export const convertArrayToFormData = (form_data, values, name) => {
   if (!values && name) form_data.append(name, "");
   else {
     if (typeof values == "object") {
-      for (let key in values) {
+      for (const key in values) {
         if (typeof values[key] == "object")
           convertArrayToFormData(
             form_data,

@@ -218,7 +218,7 @@ const routes = [
     name: "admin",
     redirect: "/admin/dashboard",
     beforeEnter: (to, from, next) => {
-      let user = JSON.parse(sessionStorage.user)
+      const user = JSON.parse(sessionStorage.user)
       if (user.role_name.includes('admin')) next()
       else {
         next({ name: 'user' })
@@ -370,7 +370,7 @@ router.beforeEach((to, from, next) => {
     if (sessionStorage.authToken == null && sessionStorage.userLoggedIn == null)
       next();
     else {
-      let user = JSON.parse(sessionStorage.user)
+      const user = JSON.parse(sessionStorage.user)
       if (user.role_name.includes('admin')) {
         next({ name: 'admin' })
       }

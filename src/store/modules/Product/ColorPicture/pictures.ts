@@ -21,7 +21,7 @@ const actions = {
     .catch(({response})=>console.log(response))
   },
   addImageForColorProduct({dispatch},product){
-    let formData = new FormData()
+    const formData = new FormData()
     convertObjectToFormData(product,formData)
     return new Promise((resolve,reject)=>{
       apiURL.post(`products/${product.id}/colors/${product.color_name.id}`,formData)
