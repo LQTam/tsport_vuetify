@@ -12,7 +12,6 @@
     "@casl/vue": "^0.5.1",
     "@ckeditor/ckeditor5-build-classic": "^17.0.0",
     "@ckeditor/ckeditor5-vue": "^1.0.1",
-    "@types/awesome-notifications": "^3.1.1",
     "axios": "^0.26.0",
     "chart.js": "^2.9.3",
     "core-js": "^3.6.4",
