@@ -286,6 +286,7 @@
 
 <script>
 import { ValidationObserver, ValidationProvider } from "vee-validate";
+import userSingleStore from '@/store/modules/userSingleStore';
 const initUser = {
   created_at: "2020-April-13 20:34:07",
   email: "sendlaravel.example@gmail.com",
@@ -343,7 +344,7 @@ export default {
   },
   methods: {
     async me() {
-      let data = await this.$store.dispatch("UserSingle/me");
+      let data = await userSingleStore.me();
       this.user = data;
     },
     previewUserAvatarM(e) {
@@ -359,8 +360,7 @@ export default {
       this.user.supplier.logo = e;
     },
     updateCustomerProfile() {
-      this.$store
-        .dispatch("UserSingle/updateCustomerProfile", this.user.customer)
+      userSingleStore.updateCustomerProfile(this.user.customer)
         .then(({ message, customer }) => {
           this.user.customer = customer;
           this.previewCustomerAvatar = "";
@@ -377,8 +377,7 @@ export default {
         password: this.user.password,
         passwordConfirmation: this.user.passwordConfirmation,
       };
-      this.$store
-        .dispatch("UserSingle/updateUserProfile", data)
+      userSingleStore.updateUserProfile(data)
         .then(({ data: { message, user } }) => {
           this.user = user;
           // sessionStorage.setItem("user", JSON.stringify(user));
@@ -392,8 +391,7 @@ export default {
         });
     },
     updateSupplierProfile() {
-      this.$store
-        .dispatch("UserSingle/updateSupplierProfile", this.user.supplier)
+        userSingleStore.updateSupplierProfile(this.user.supplier)
         .then(({ message, supplier }) => {
           this.user.supplier = supplier;
           this.$awn.success(message);
