@@ -11,7 +11,7 @@
                   <v-text-field
                     label="Email address"
                     type="email"
-                    v-model="user.email"
+                    v-model="form.email"
                     :error-messages="errors"
                   />
                 </validation-provider>
@@ -20,7 +20,7 @@
                   <v-text-field
                     label="Password"
                     :type="showPsw ? 'text' : 'password'"
-                    v-model="user.password"
+                    v-model="form.password"
                     :error-messages="errors"
                   />
                 </validation-provider>
@@ -51,36 +51,43 @@
   </div>
 </template>
 
-<script>
-import { mapActions } from "vuex";
-import { ValidationProvider, ValidationObserver } from "vee-validate";
-export default {
+<script lang="ts">
+  import { ValidationProvider, ValidationObserver } from "vee-validate";
+  import {Component, Vue} from 'vue-property-decorator';
+  import Form from 'vform';
+import { API_PREFIX} from "@/utils";
+import userSingleStore from "@/store/modules/userSingleStore";
+
+@Component({
   components: {
-    ValidationProvider,
     ValidationObserver,
-  },
-  data: () => ({
-    user: {
-      email: "",
-      password: "",
-    },
-    showPsw: false,
-  }),
-  methods: {
-    ...mapActions("UserSingle", ["loginUser"]),
-    login() {
-      this.loginUser(this.user)
-        .then((res) => {
-          this.$eventHub.$emit("userLoggedIn", "logged");
-          this.$eventHub.$emit("updateUser", res.data.user);
-          window.location.href = "/user";
-        })
-        .catch((err) => {
-          this.$awn.warning(err.response.data.error);
-        });
-    },
-  },
-};
+    ValidationProvider
+  }
+})
+export default class Login extends Vue {
+  form = Form.make({email: "", password: ""});
+
+  showPsw= false;
+
+  async login() {
+    try{
+      const res = await this.form.post(`${API_PREFIX}/auth/login`)
+      console.log(res);
+      userSingleStore.SET_USER(res.data.user);
+      sessionStorage.setItem("user", JSON.stringify(res.data.user));
+      sessionStorage.setItem("authToken", res.data.access_token);
+      sessionStorage.setItem("userLoggedIn", "logged");
+
+      const d = new Date()
+      d.setHours(d.getHours() + (res.data.expires_in / 60 / 60))
+      sessionStorage.setItem("expires_in", d.toString());
+      this.$root.$emit("userLoggedIn", "logged");
+      window.location.href = "/user";
+    }
+    // eslint-disable-next-line no-empty
+    catch(err){}
+  }
+}
 </script>
 
 <style lang="scss" scoped>

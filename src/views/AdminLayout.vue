@@ -108,7 +108,7 @@
       </v-menu>
     </v-app-bar>
 
-    <!-- <v-content> -->
+    <!-- <v-main> -->
     <v-container class="fill-height" fluid>
       <v-row>
         <v-breadcrumbs :items="$route.meta.breadcrumb">
@@ -119,7 +119,7 @@
       </v-row>
       <router-view></router-view>
     </v-container>
-    <!-- </v-content> -->
+    <!-- </v-main> -->
     <!-- <v-btn bottom color="pink" dark fab fixed right @click="dialog = !dialog">
       <v-icon>mdi-plus</v-icon>
     </v-btn>
@@ -184,7 +184,7 @@ export default {
     }
   },
   mounted() {
-    this.$eventHub.$on("userLoggedIn", state => (this.authLogged = state));
+    this.$root.$on("userLoggedIn", state => (this.authLogged = state));
   },
   methods: {
     logout() {

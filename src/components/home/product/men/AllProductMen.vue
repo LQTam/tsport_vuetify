@@ -182,8 +182,8 @@ export default {
     },
   },
   created() {
-    this.$eventHub.$on("filterKey", (val) => (this.key = val));
-    this.$eventHub.$on("filterSize", (val) => {
+    this.$root.$on("filterKey", (val) => (this.key = val));
+    this.$root.$on("filterSize", (val) => {
       this.size = val;
     });
   },
@@ -233,7 +233,7 @@ export default {
           cart.push(product);
           localStorage.setItem("cart", JSON.stringify(cart));
         }
-        this.$eventHub.$emit("changeCartDrawer", true);
+        this.$root.$emit("changeCartDrawer", true);
       } else {
         cart.push({
           ...item,
@@ -249,7 +249,7 @@ export default {
           },
         });
         localStorage.setItem("cart", JSON.stringify(cart));
-        this.$eventHub.$emit("changeCartDrawer", true);
+        this.$root.$emit("changeCartDrawer", true);
       }
     },
   },

@@ -157,12 +157,12 @@ export default {
   watch: {
     $route: function() {
       this.size = null;
-      this.$eventHub.$emit("filterSize", null);
+      this.$root.$emit("filterSize", null);
       this.fetchCate();
     }
   },
   created() {
-    this.$eventHub.$on("filterKey", val => (this.key = val));
+    this.$root.$on("filterKey", val => (this.key = val));
     this.fetchCate();
   },
   mounted() {
@@ -170,7 +170,7 @@ export default {
   },
   methods: {
     fetchCate() {
-      this.$axios
+      this.$http
         .get("http://localhost:8000/api/categories", {
           params: {
             showData: true
@@ -192,7 +192,7 @@ export default {
         size_name,
         key: this.key
       });
-      this.$eventHub.$emit("filterSize", size_name);
+      this.$root.$emit("filterSize", size_name);
     },
     clearFilter() {
       let { category_name, type } = this.$route.params;
@@ -202,7 +202,7 @@ export default {
         type
       });
       this.size = null;
-      this.$eventHub.$emit("filterSize", null);
+      this.$root.$emit("filterSize", null);
     }
   },
   computed: {

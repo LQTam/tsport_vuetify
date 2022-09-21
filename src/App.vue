@@ -352,11 +352,11 @@
       </v-btn>
     </v-app-bar>
 
-    <v-content>
+    <v-main>
       <v-container fluid>
         <router-view></router-view>
       </v-container>
-    </v-content>
+    </v-main>
     <!-- <v-btn bottom color="pink" dark fab fixed right @click="dialog = !dialog">
       <v-icon>mdi-plus</v-icon>
     </v-btn>
@@ -528,6 +528,7 @@
 
 <script>
 import SearchProduct from "@/components/SearchProduct.vue";
+import Axios from 'axios';
 export default {
   name: "Home",
   components: {
@@ -761,25 +762,25 @@ export default {
   },
   created() {
     this.viewCart();
-    this.$eventHub.$on("viewCart", () => {
+    this.$root.$on("viewCart", () => {
       this.viewCart();
     });
-    this.$eventHub.$on("descCartItem", (val) => {
+    this.$root.$on("descCartItem", (val) => {
       this.descCartItem(val);
     });
-    this.$eventHub.$on("incCartItem", (val) => {
+    this.$root.$on("incCartItem", (val) => {
       this.incCartItem(val);
     });
-    this.$eventHub.$on("removeCartItem", (val) => {
+    this.$root.$on("removeCartItem", (val) => {
       this.removeCartItem(val);
     });
-    this.$eventHub.$on("changeCartDrawer", (val) => {
+    this.$root.$on("changeCartDrawer", (val) => {
       this.cartDrawer = val;
       console.log(val);
       this.viewCart();
     });
-    this.$axios
-      .get("http://localhost:8000/api/categories", {
+    
+      Axios.get("http://localhost:8000/api/categories", {
         params: { showData: true },
       })
       .then(({ data }) => {

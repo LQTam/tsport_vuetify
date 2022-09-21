@@ -158,7 +158,7 @@ export default {
         localStorage.setItem("cart", JSON.stringify(cart));
         this.$awn.success("Success add product to cart.");
       }
-      this.$eventHub.$emit("viewCart");
+      this.$root.$emit("viewCart");
     },
     gotoProd(prod) {
       this.searchMenu = false;

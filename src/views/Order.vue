@@ -426,18 +426,18 @@ export default {
         .post("orders", customer_order_info)
         .then(({ data: { message, order_id } }) => {
           this.$awn.success(message);
-          this.$eventHub.$emit("orderSuccess", order_id);
+          this.$root.$emit("orderSuccess", order_id);
         })
         .catch(({ resolve }) => console.log(resolve));
     },
     descCartItem(item) {
-      this.$eventHub.$emit("descCartItem", item);
+      this.$root.$emit("descCartItem", item);
     },
     incCartItem(item) {
-      this.$eventHub.$emit("incCartItem", item);
+      this.$root.$emit("incCartItem", item);
     },
     removeCartItem(item) {
-      this.$eventHub.$emit("removeCartItem", item);
+      this.$root.$emit("removeCartItem", item);
     }
   }
 };

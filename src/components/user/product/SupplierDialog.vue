@@ -3,7 +3,7 @@
       <v-card>
           <v-card-title>{{formTitle}}</v-card-title>
           <v-card-text>
-              <validation-observer v-slot='{invalid}'>
+              <validation-observer>
                   <v-row>
                       <validation-provider name="Company Name" rules="required" v-slot="{errors}">
                           <v-text-field v-model="supplier.company_name" :error-messages="errors" label="Company Name" />

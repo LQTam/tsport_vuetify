@@ -124,7 +124,7 @@
       </v-menu>
     </v-app-bar>
 
-    <!-- <v-content> -->
+    <!-- <v-main> -->
     <v-container class="fill-height" fluid>
       <v-row>
         <v-breadcrumbs :items="$route.meta.breadcrumb">
@@ -135,7 +135,7 @@
       </v-row>
       <router-view></router-view>
     </v-container>
-    <!-- </v-content> -->
+    <!-- </v-main> -->
     <!-- <v-btn bottom color="pink" dark fab fixed right @click="dialog = !dialog">
       <v-icon>mdi-plus</v-icon>
     </v-btn> -->
@@ -207,7 +207,7 @@ export default {
     }
   },
   mounted() {
-    this.$eventHub.$on("userLoggedIn", state => (this.authLogged = state));
+    this.$root.$on("userLoggedIn", state => (this.authLogged = state));
   },
   watch: {
     $route: function() {
@@ -246,7 +246,7 @@ export default {
       this.$store
         .dispatch("Notification/unread", notify)
         .then(({ notifications, unreadNotifications }) => {
-          this.$eventHub.$emit("fetchOrders", notify.data.madh);
+          this.$root.$emit("fetchOrders", notify.data.madh);
           if (this.$route.name != "order-manager")
             this.$router.push({ name: "order-manager" });
           this.notifications = notifications;
@@ -277,7 +277,7 @@ export default {
       }
     );
     this.fetchNotifications();
-    this.$eventHub.$on("deleteNotify", madh => {
+    this.$root.$on("deleteNotify", madh => {
       let index = this.notifications.findIndex(
         notify => notify.data.madh === madh
       );

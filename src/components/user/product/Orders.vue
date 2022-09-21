@@ -181,13 +181,13 @@ export default {
   },
 
   created() {
-    this.$eventHub.$on("fetchOrders", (madh) => {
+    this.$root.$on("fetchOrders", (madh) => {
       this.$store.dispatch("OrderIndex/fetchData").then(({ data }) => {
         let item = data.filter((item) => item.madh === madh)[0];
         if (item) this.viewOrderDetail(item);
         else {
           this.$awn.warning("This order current was be deleted.");
-          this.$eventHub.$emit("deleteNotify", madh);
+          this.$root.$emit("deleteNotify", madh);
         }
       });
     });
