@@ -20,6 +20,7 @@
     "lodash": "^4.17.21",
     "moment": "^2.25.3",
     "pusher-js": "^6.0.3",
+    "socket.io-client": "^2.4.0",
     "sweetalert2": "^11.4.33",
     "vee-validate": "^3.2.5",
     "vform": "^2.1.2",

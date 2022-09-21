@@ -15,19 +15,16 @@ class SocketStore extends VuexModule{
     initEcho() {
         if(this.echo) return;
         this.echo = new Echo({
-            // broadcaster: 'socket.io',
-            // host: `${window.location.hostname}${process.env.port}`,
-            broadcaster:'pusher',
-            key: process.env['VUE_APP_PUSHER_APP_KEY'],
-            cluster: process.env['VUE_APP_PUSHER_APP_CLUSTER'],
-            authEndpoint:'/broadcasting/auth',
-            encrypted:true,
-            auth:{
-                headers:{
-                    Authorization:'Bearer '+sessionStorage['authToken']
-                }
-            },
-            forceTLS:true
+            broadcaster: 'socket.io',
+            host: `${window.location.hostname}:${process.env.VUE_APP_SOCKET_PORT}`,
+            // authEndpoint:'/broadcasting/auth',
+            // encrypted:true,
+            // auth:{
+                // headers:{
+                    // Authorization:'Bearer '+sessionStorage['authToken']
+                // }
+            // },
+            // forceTLS:true
         })
     }
 

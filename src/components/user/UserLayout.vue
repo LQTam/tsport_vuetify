@@ -180,106 +180,94 @@
   </v-app>
 </template>
 
-<script>
+<script lang="ts">
 import moment from "moment";
 import EventHub from "@/components/EventHub.vue";
-export default {
-  components: {
-    EventHub
-  },
-  props: {
-    source: String
-  },
-  computed: {
-    drawerComp: {
-      get() {
-        return this.drawer;
-      },
-      set(value) {
-        this.drawer = value;
-      }
+import {Component, Prop, Vue, Watch} from "vue-property-decorator";
+import { UserResource } from "@/models";
+import socketStore from "@/store/modules/socketStore";
+import notificationStore from "@/store/modules/notifications";
+@Component({
+  components: {EventHub}
+})
+export default class UserLayout extends Vue {
+  @Prop() source!: string;
+
+  user: UserResource = JSON.parse(sessionStorage.user) ?? "";
+  totalNotify= 0;
+  authLogged: string = sessionStorage.userLoggedIn ?? null;
+  drawer= false;
+  dialog= false;
+  notifications= [];
+  items: any[] = [
+    {
+      icon: "briefcase",
+      text: "Task Manager",
+      model: false,
+      can: "view_task_management",
+      children: [
+        {
+          text: "Supplier Manager",
+          to: "supplier-manager",
+          icon: "account",
+          can: "access_supplier"
+        },
+        {
+          icon: "account",
+          text: "Customer Manager",
+          model: false,
+          to: "customer-manager",
+          can: "access_customer"
+        },
+        {
+          text: "Category Manager",
+          to: "category-manager",
+          icon: "briefcase-account",
+          can: "access_category"
+        },
+        {
+          icon: "briefcase",
+          text: "Product Manager",
+          model: false,
+          to: "product-manager",
+          can: "access_product"
+        },
+      ]
     },
-    notificationsStore() {
+    {
+      icon: "cart-arrow-down",
+      text: "Order Manager",
+      model: false,
+      to: "order-manager",
+      can: "access_order_manager"
+    }
+  ]
+
+    get drawerComp() {
+      return this.drawer;
+    }
+
+    set drawerComp(val: boolean) {
+      this.drawer = val;
+    }
+      
+    get notificationsStore() {
       return this.$store.getters["Notification/notifications"];
-    },
-    unreadNotificationsStore() {
+    }
+
+    get unreadNotificationsStore() {
       return this.$store.getters["Notification/unreadNotifications"];
     }
-  },
+    
   mounted() {
     this.$root.$on("userLoggedIn", state => (this.authLogged = state));
-  },
-  watch: {
-    $route: function() {
-      this.fetchNotifications();
-    }
-  },
-  methods: {
-    logout() {
-      this.$swal({
-        title: "Are you sure?",
-        text: `Your session will be done!`,
-        icon: "warning",
-        showCancelButton: true,
-        confirmButtonText: "Logout",
-        confirmButtonColor: "#dd4b39",
-        focusCancel: true,
-        reverseButtons: true
-      }).then(result => {
-        if (result.value) {
-          this.$store.dispatch("UserSingle/logout").then(() => {
-            window.location.href = "/login";
-          });
-        }
-      });
-    },
-    moment(date) {
-      return moment(date).fromNow();
-    },
-    gotoHome() {
-      window.location.href = "/";
-    },
-    openNav(value) {
-      this.drawer = value;
-    },
-    unread(notify) {
-      this.$store
-        .dispatch("Notification/unread", notify)
-        .then(({ notifications, unreadNotifications }) => {
-          this.$root.$emit("fetchOrders", notify.data.madh);
-          if (this.$route.name != "order-manager")
-            this.$router.push({ name: "order-manager" });
-          this.notifications = notifications;
-          this.totalNotify = unreadNotifications.length;
-        });
-    },
-    fetchNotifications() {
-      this.$store
-        .dispatch("Notification/fetchNotifications")
-        .then(({ notifications, unreadNotifications }) => {
-          this.notifications = notifications;
-          this.totalNotify = unreadNotifications.length;
-        });
-    }
-  },
-  created() {
-    window.Echo.private(`OrderSuccess`).listen("OrderSuccess", e => {
-      console.log(e);
-    });
-    window.Echo.private(`App.User.${this.$root["user"]["id"]}`).notification(
-      notification => {
-        this.$store
-          .dispatch("Notification/fetchNotifications")
-          .then(({ notifications }) => {
-            this.notifications = notifications;
-          });
-        this.totalNotify = notification.count;
-      }
-    );
+    socketStore.initEcho();
+    this.listenEvent();
+
     this.fetchNotifications();
     this.$root.$on("deleteNotify", madh => {
       let index = this.notifications.findIndex(
-        notify => notify.data.madh === madh
+        (notify: any) => notify.data.madh === madh
       );
       this.$store
         .dispatch("Notification/delete", {
@@ -288,61 +276,85 @@ export default {
         })
         .then(() => this.notifications.splice(index, 1));
     });
-  },
-  data() {
-    let authLogged = sessionStorage.userLoggedIn ?? null;
-    let user = JSON.parse(sessionStorage.user) ?? "";
-    return {
-      user: user,
-      totalNotify: 0,
-      authLogged: authLogged,
-      drawer: false,
-      dialog: false,
-      notifications: [],
-      items: [
-        {
-          icon: "briefcase",
-          text: "Task Manager",
-          model: false,
-          can: "view_task_management",
-          children: [
-            {
-              text: "Supplier Manager",
-              to: "supplier-manager",
-              icon: "account",
-              can: "access_supplier"
-            },
-            {
-              icon: "account",
-              text: "Customer Manager",
-              model: false,
-              to: "customer-manager",
-              can: "access_customer"
-            },
-            {
-              text: "Category Manager",
-              to: "category-manager",
-              icon: "briefcase-account",
-              can: "access_category"
-            },
-            {
-              icon: "briefcase",
-              text: "Product Manager",
-              model: false,
-              to: "product-manager",
-              can: "access_product"
-            },
-          ]
-        },
-        {
-          icon: "cart-arrow-down",
-          text: "Order Manager",
-          model: false,
-          to: "order-manager",
-          can: "access_order_manager"
-        }
-      ]
-    };
   }
-};
+
+  @Watch("$route")
+  onRouteChange() {
+    this.fetchNotifications();
+  }
+
+  logout() {
+    this.$swal.fire({
+      title: "Are you sure?",
+      text: `Your session will be done!`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonText: "Logout",
+      confirmButtonColor: "#dd4b39",
+      focusCancel: true,
+      reverseButtons: true
+    }).then(result => {
+      if (result.value) {
+        this.$store.dispatch("UserSingle/logout").then(() => {
+          window.location.href = "/login";
+        });
+      }
+    });
+  }
+
+  moment(date) {
+    return moment(date).fromNow();
+  }
+
+  gotoHome() {
+    window.location.href = "/";
+  }
+
+  openNav(value) {
+    this.drawer = value;
+  }
+
+  unread(notify) {
+    this.$store
+      .dispatch("Notification/unread", notify)
+      .then(({ notifications, unreadNotifications }) => {
+        this.$root.$emit("fetchOrders", notify.data.madh);
+        if (this.$route.name != "order-manager")
+          this.$router.push({ name: "order-manager" });
+        this.notifications = notifications;
+        this.totalNotify = unreadNotifications.length;
+      });
+  }
+
+  fetchNotifications() {
+    this.$store
+      .dispatch("Notification/fetchNotifications")
+      .then(({ notifications, unreadNotifications }) => {
+        this.notifications = notifications;
+        this.totalNotify = unreadNotifications.length;
+      });
+  }
+
+  listenEvent(){
+    if(!this.user) return;
+    socketStore.JOIN_USER_CHANNEL(this.user.id);
+    if(!socketStore.userChannel || Object.keys(socketStore.userChannel.events).length) return;
+
+    socketStore.echo?.private("OrderSuccess")
+    .listen("OrderSuccess", e => {
+        console.log(e);
+    });
+
+    socketStore.userChannel
+    .notification(
+      notification => {
+        notificationStore.fetchNotifications()
+        .then(({ notifications }: any) => {
+            this.notifications = notifications;
+          });
+        this.totalNotify = notification.count;
+      }
+    )
+  }
+}
 </script>
