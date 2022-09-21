@@ -1,7 +1,7 @@
 import store from '@/store';
 import { apiURL } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import productSingleStore from './Product/single';
+import productSingleStore from './productSingleStore';
 
 @Module({dynamic: true, name:"supplierStore", store, namespaced: true})
 class SupplierStore extends VuexModule {

@@ -1,7 +1,7 @@
 import store from '@/store';
 import { apiURL } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import alertStore from '../alert';
+import alertStore from './alert';
 
 @Module({dynamic: true, name:"productSingleStore", store, namespaced: true})
 class ProductSingleStore extends VuexModule {
@@ -159,7 +159,7 @@ class ProductSingleStore extends VuexModule {
   }
 
   @Action({})
-  store(product: any) {
+  createProduct(product: any) {
     this.loadingState = true;
     alertStore.setAlert(null);
 
@@ -215,7 +215,7 @@ class ProductSingleStore extends VuexModule {
           resolve(data);
         })
         .catch(err => {
-          let { errors, message } = err.reponse.data;
+          const { errors, message } = err.reponse.data;
           alertStore.setAlert({ errors, message, color: "danger" });
           reject(err);
         })

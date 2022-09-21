@@ -1,8 +1,7 @@
 import store from '@/store';
-import { apiURL } from "@/utils";
+import { apiURL, convertObjectToFormData } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import { convertObjectToFormData } from "../../../../utils";
-import productSingleStore from '../single';
+import productSingleStore from './productSingleStore';
 
 @Module({dynamic: true, name: "pictureStore", store, namespaced: true})
 class PictureStore extends VuexModule {
@@ -25,7 +24,7 @@ class PictureStore extends VuexModule {
   
   @Action
   addImageForColorProduct(product: any){
-    let formData = new FormData()
+    const formData = new FormData()
     convertObjectToFormData(product,formData)
     return new Promise((resolve,reject)=>{
       apiURL.post(`products/${product.id}/colors/${product.color_name.id}`,formData)

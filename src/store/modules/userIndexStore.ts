@@ -1,42 +1,25 @@
 import store from '@/store';
 import { apiURL } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import alertStore from '../alert';
+import alertStore from './alert';
 
-@Module({dynamic: true, name: "productIndexStore", store, namespaced: true})
-class ProductIndexStore extends VuexModule {
-  productsState: any =  {
-    meta: {
-      last_page: 1,
-      current_page: 1,
-      total: 0
-    }
-  };
 
-  fetchingState: any =  false;
+@Module({dynamic: true, name: "userIndexStore", store, namespaced: true})
+class UserIndexStore extends VuexModule {
+  usersState: any;
 
-  paginationState: any =  {
-    page: 1,
-    dir: "desc",
-    column: 0,
-    search: "",
-    length: 10
-  };
+  fetchingState: boolean = false;
 
-  sortKeyState: any =  "id";
+  paginationState: any;
 
-  sortGroupState: any =  {};
+  sortKeyState: string = "id";
 
-  queryState: any =  {
-    length: 10,
-    page: 1,
-    column: 0,
-    dir: "desc",
-    search: ""
-  };
+  sortGroupState: any;
 
-  get products(): any {
-    return this.productsState;
+  queryState: any;
+
+  get users(): any {
+    return this.usersState;
   }
 
   get fetching(): any {
@@ -47,12 +30,12 @@ class ProductIndexStore extends VuexModule {
     return this.paginationState;
   }
 
-  get sortGroup(): any {
-    return this.sortGroupState;
-  }
-
   get sortKey(): any {
     return this.sortKeyState;
+  }
+
+  get sortGroup(): any {
+    return this.sortGroupState;
   }
 
   get query(): any {
@@ -61,14 +44,14 @@ class ProductIndexStore extends VuexModule {
 
   @Mutation
   SET_ALL(data: any) {
-    this.productsState = data;
+    this.usersState = data;
   }
 
   @Mutation
   SET_FETCHING(data: any) {
     this.fetchingState = data;
   }
-
+  
   @Mutation
   SET_PAGINATION(pagination: any) {
     this.paginationState = pagination;
@@ -81,7 +64,7 @@ class ProductIndexStore extends VuexModule {
 
   @Mutation
   SET_PAGE(page: any) {
-    this.productsState.meta.current_page = page;
+    this.usersState.meta.current_page = page;
   }
 
   @Mutation
@@ -96,45 +79,41 @@ class ProductIndexStore extends VuexModule {
 
   @Mutation
   INIT_STATE() {
-    this.productsState =  {
+    this.usersState = {
       meta: {
         last_page: 1,
         current_page: 1,
         total: 0
       }
-    };
-  
-    this.fetchingState =  false;
-  
-    this.paginationState =  {
+    },
+    this.fetchingState = false,
+    this.paginationState = {
       page: 1,
       dir: "desc",
       column: 0,
       search: "",
       length: 10
-    };
-  
-    this.sortKeyState =  "id";
-  
-    this.sortGroupState =  {};
-  
-    this.queryState =  {
+    },
+    this.sortKeyState = "id",
+    this.sortGroupState = {},
+    this.queryState = {
       length: 10,
       page: 1,
       column: 0,
       dir: "desc",
       search: ""
-    };
+    }
   }
 
-  @Action
+  @Action({})
   fetchData(query = null) {
-    this.SET_FETCHING(true);
+    this.fetchingState = true;
     return new Promise((resolve, reject) => {
       return apiURL
         .get(
-          "products",
-          query != null ? { params: query } : { params: this.queryState }
+          "users",
+          // { params: state.query },
+          query != null ? { params: query } : { params: this.query }
         )
         .then(res => {
           const data = res.data;
@@ -142,25 +121,26 @@ class ProductIndexStore extends VuexModule {
           resolve(data);
         })
         .catch(err => {
-          alertStore.setAlert(err.response);
+          alertStore.setAlert(err.reponse)
           reject(err.response);
         })
         .finally(() => {
-          this.SET_FETCHING(false);
+          this.fetchingState = false;
         });
     });
   }
-  
-  @Action({commit: "SET_QUERY"})
+
+  @Action({})
   setQuery(query: any) {
-    return query;
+    this.setQuery(query);
   }
 
-  @Action
+  @Action({})
   resetState() {
-    this.INIT_STATE;
+    this.INIT_STATE();
   }
 }
 
-const productIndexStore = getModule(ProductIndexStore);
-export default productIndexStore;
+const userIndexStore = getModule(UserIndexStore);
+
+export default userIndexStore;

@@ -1,14 +1,16 @@
-import { UserResource, RoleResource, CustomerResource, SupplierResource } from './../../../models/index';
+import axios from 'axios';
 import {
   apiURL,
+  API_PREFIX,
   convertObjectToFormData
 } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
 import store from "@/store";
-import alertStore from '../alert';
-import userIndexStore from '.';
+import alertStore from './alert';
+import userIndexStore from './userIndexStore';
+import { CustomerResource, RoleResource, SupplierResource, UserResource } from "@/models";
 
-@Module({ namespaced: true, dynamic: true, store, name: 'userSingleStore' })
+@Module({ dynamic: true, store, name: 'userSingleStore' })
 class UserSingleStore extends VuexModule {
   userResource!: UserResource;
 
@@ -78,7 +80,7 @@ class UserSingleStore extends VuexModule {
 
   @Action({})
   updateUserProfile(data: UserResource) {
-    let formData = new FormData();
+    const formData = new FormData();
     convertObjectToFormData(data, formData);
 
     formData.append("_method", 'put')
@@ -99,7 +101,7 @@ class UserSingleStore extends VuexModule {
 
   @Action({})
   updateCustomerProfile(data: CustomerResource) {
-    let formData = new FormData();
+    const formData = new FormData();
     convertObjectToFormData(data, formData);
 
     formData.append("_method", 'put')
@@ -118,7 +120,7 @@ class UserSingleStore extends VuexModule {
 
   @Action({})
   updateSupplierProfile(data: SupplierResource) {
-    let formData = new FormData();
+    const formData = new FormData();
     convertObjectToFormData(data, formData)
     formData.append('_method', 'put')
     return new Promise((resolve, reject) => {
@@ -134,9 +136,18 @@ class UserSingleStore extends VuexModule {
     })
   }
 
-  @Action({})
-  loginUser(user: UserResource) {
-    this.loading = true;
+  @Action({commit: "SET_USER"})
+  async loginUser(user: {email: string, password: string}) {
+    // this.loading = true;
+    try{
+      const res = await axios.post(`${API_PREFIX}/auth/login`, user);
+      console.log(res);
+      return res.data.user;
+    }
+    catch(e) {
+      // this.loading = false;
+      return [];
+    }
     return new Promise((resolve, reject) => {
       return apiURL
         .post("auth/login", user)
@@ -146,7 +157,7 @@ class UserSingleStore extends VuexModule {
           sessionStorage.setItem("authToken", res.data.access_token);
           sessionStorage.setItem("userLoggedIn", "logged");
 
-          let d = new Date()
+          const d = new Date()
           d.setHours(d.getHours() + (res.data.expires_in / 60 / 60))
           sessionStorage.setItem("expires_in", d.toString());
           resolve(res);
@@ -213,7 +224,7 @@ class UserSingleStore extends VuexModule {
   }
 
   @Action({})
-  store(user: UserResource) {
+  createUser(user: UserResource) {
     this.loading = true;
     alertStore.resetState();
 
@@ -225,8 +236,8 @@ class UserSingleStore extends VuexModule {
           resolve(res);
         })
         .catch(error => {
-          let message = error.response.data.message || error.message;
-          let errors = error.response.data.errors;
+          const message = error.response.data.message || error.message;
+          const errors = error.response.data.errors;
           alertStore.setAlert({
             message,
             errors,
@@ -260,8 +271,8 @@ class UserSingleStore extends VuexModule {
           resolve(res);
         })
         .catch(err => {
-          let message = err.response.data.message || err.message;
-          let errors = err.response.data.errors;
+          const message = err.response.data.message || err.message;
+          const errors = err.response.data.errors;
           alertStore.setAlert({
             message,
             errors,
@@ -285,7 +296,7 @@ class UserSingleStore extends VuexModule {
           resolve(res);
         })
         .catch(err => {
-          let {
+          const {
             errors,
             message
           } = err.reponse.data;

@@ -1,11 +1,11 @@
 import store from '@/store';
 import { apiURL } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import alertStore from '../alert';
-import permissionIndexStore from '.';
+import alertStore from './alert';
+import permissionIndexStore from './permissionIndexStore';
 
 @Module({dynamic: true, name:'PermissionSingleStore', store, namespaced: true})
-class PermissiongSingleStore extends VuexModule {
+class PermissionSingleStore extends VuexModule {
   permissionState: any= {
     id: "",
     name: ""
@@ -28,13 +28,13 @@ class PermissiongSingleStore extends VuexModule {
         this.SET_PERMISSION(res.data.data);
       })
       .catch(err => {
-        let { errors, message } = err.response.data;
+        const { errors, message } = err.response.data;
         alertStore.setAlert({ errors, message, color: "danger" });
       });
   }
 
   @Action
-  store() {
+  createPermission() {
     this.SET_FETCHING(true);
     return new Promise((resolve, reject) => {
       apiURL
@@ -130,6 +130,6 @@ class PermissiongSingleStore extends VuexModule {
   }
 }
 
-const PermissionSingleStore = getModule(PermissiongSingleStore);
+const permissionSingleStore = getModule(PermissionSingleStore);
 
-export default PermissionSingleStore;
+export default permissionSingleStore;

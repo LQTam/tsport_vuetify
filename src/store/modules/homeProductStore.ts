@@ -1,7 +1,7 @@
 import store from '@/store';
 import { apiURL } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import alertStore from '../alert';
+import alertStore from './alert';
 
 @Module({dynamic: true, name: 'homeProductStore', store, namespaced: true})
 class HomeProductStore extends VuexModule {

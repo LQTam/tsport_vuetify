@@ -1,8 +1,8 @@
 import store from '@/store';
 import { apiURL } from "@/utils";
 import { Action, getModule, Module, Mutation, VuexModule } from "vuex-module-decorators";
-import alertStore from '../alert';
-import roleIndexStore from '.';
+import alertStore from './alert';
+import roleIndexStore from './roleIndexStore';
 
 @Module({dynamic:true, name:"roleSingleStore", store, namespaced: true})
 class RoleSingleStore extends VuexModule {
@@ -72,7 +72,7 @@ class RoleSingleStore extends VuexModule {
         this.SET_ROLE(res.data.data);
       })
       .catch(err => {
-        let { errors, message } = err.response.data;
+        const { errors, message } = err.response.data;
         alertStore.setAlert({ errors, message, color: "danger" })
       });
       this.fetchPermisisonsAll();
@@ -91,9 +91,9 @@ class RoleSingleStore extends VuexModule {
   }
   
   @Action
-  store() {
+  createRole() {
     this.SET_FETCHING(true);
-    let role = {
+    const role = {
       ...this.roleState,
       permission: getPermissionID(this.roleState.permission)
     };
@@ -116,7 +116,7 @@ class RoleSingleStore extends VuexModule {
   @Action
   update() {
     this.SET_FETCHING(true);
-    let role = {
+    const role = {
       ...this.roleState,
       permission: getPermissionID(this.roleState.permission)
     };
@@ -139,7 +139,7 @@ class RoleSingleStore extends VuexModule {
   @Action
   delete() {
     this.SET_FETCHING(true);
-    let role = {
+    const role = {
       ...this.roleState,
       permission: getPermissionID(this.roleState.permission)
     };
@@ -180,7 +180,7 @@ class RoleSingleStore extends VuexModule {
   }
 }
 function getPermissionID(array: any[]) {
-  let permission: any = [];
+  const permission: any = [];
   if (array) {
     array.forEach(v => permission.push(v.id));
   }
