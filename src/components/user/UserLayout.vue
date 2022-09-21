@@ -252,11 +252,11 @@ export default class UserLayout extends Vue {
     }
       
     get notificationsStore() {
-      return this.$store.getters["Notification/notifications"];
+      return notificationStore.notifications;
     }
 
     get unreadNotificationsStore() {
-      return this.$store.getters["Notification/unreadNotifications"];
+      return notificationStore.unreadNotifications;
     }
     
   mounted() {
@@ -315,23 +315,21 @@ export default class UserLayout extends Vue {
   }
 
   unread(notify) {
-    this.$store
-      .dispatch("Notification/unread", notify)
-      .then(({ notifications, unreadNotifications }) => {
+    notificationStore.unread(notify)
+      .then((res:any) => {
         this.$root.$emit("fetchOrders", notify.data.madh);
         if (this.$route.name != "order-manager")
           this.$router.push({ name: "order-manager" });
-        this.notifications = notifications;
-        this.totalNotify = unreadNotifications.length;
+        this.notifications = res.notifications;
+        this.totalNotify = res.unreadNotifications.length;
       });
   }
 
   fetchNotifications() {
-    this.$store
-      .dispatch("Notification/fetchNotifications")
-      .then(({ notifications, unreadNotifications }) => {
-        this.notifications = notifications;
-        this.totalNotify = unreadNotifications.length;
+      notificationStore.fetchNotifications()
+      .then((res: any) => {
+        this.notifications = res.notifications;
+        this.totalNotify = res.unreadNotifications.length;
       });
   }
 

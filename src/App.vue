@@ -529,6 +529,8 @@
 <script>
 import SearchProduct from "@/components/SearchProduct.vue";
 import Axios from 'axios';
+import homeProductStore from './store/modules/homeProductStore';
+import userSingleStore from './store/modules/userSingleStore';
 export default {
   name: "Home",
   components: {
@@ -639,8 +641,7 @@ export default {
   },
   methods: {
     search() {
-      this.$store
-        .dispatch("HomeProduct/fetchProdsByKey", {
+      homeProductStore.fetchProdsByKey({
           key: this.searchKey,
           page: this.page,
         })
@@ -659,7 +660,7 @@ export default {
         reverseButtons: true,
       }).then((result) => {
         if (result.value) {
-          this.$store.dispatch("UserSingle/logout").then(() => {
+          userSingleStore.logout().then(() => {
             window.location.href = "/login";
           });
         }

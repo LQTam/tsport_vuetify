@@ -40,7 +40,7 @@ class CategoryIndexStore extends VuexModule {
         this.categoryState =  {};
     }
 
-    @Action({})
+    @Action
     fetchData(params = null) {
         this.loadingState = true;
         return new Promise((resolve, reject) => {

@@ -39,6 +39,7 @@
 </template>
 
 <script>
+import homeProductStore from '@/store/modules/homeProductStore';
 export default {
   data() {
     return {
@@ -93,7 +94,7 @@ export default {
   methods: {
     filterProductsByKeyWord(key) {
       let { category_name, type } = this.$route.params;
-      this.$store.dispatch("HomeProduct/fetchData", {
+      homeProductStore.fetchData({
         category_name,
         type,
         length: 50,

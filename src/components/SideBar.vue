@@ -143,6 +143,7 @@
 </template>
 
 <script>
+import homeProductStore from '@/store/modules/homeProductStore';
 export default {
   data() {
     return {
@@ -166,7 +167,7 @@ export default {
     this.fetchCate();
   },
   mounted() {
-    this.$store.dispatch("HomeProduct/fetchSizesAll");
+    homeProductStore.fetchSizesAll();
   },
   methods: {
     fetchCate() {
@@ -185,7 +186,7 @@ export default {
       let { category_name, type } = this.$route.params;
       let size_name = s.name;
       this.size = size_name;
-      this.$store.dispatch("HomeProduct/fetchData", {
+      homeProductStore.fetchData({
         length: 50,
         category_name,
         type,
@@ -196,7 +197,7 @@ export default {
     },
     clearFilter() {
       let { category_name, type } = this.$route.params;
-      this.$store.dispatch("HomeProduct/fetchData", {
+      homeProductStore.fetchData({
         length: 50,
         category_name,
         type
@@ -207,7 +208,7 @@ export default {
   },
   computed: {
     sizesAll() {
-      return this.$store.getters["HomeProduct/sizesAll"];
+      return homeProductStore.sizesAll;
     },
     categoriesComp() {
       let type = this.categories.filter(c => c.name == this.$route.params.type);

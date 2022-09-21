@@ -37,7 +37,6 @@ class NotificationStore extends VuexModule {
 
     @Action({})
     fetchNotifications() {
-        this.loadingState = true;
         return new Promise((resolve, reject) => {
             return apiURL
                 .get("/notifications")
@@ -48,7 +47,6 @@ class NotificationStore extends VuexModule {
                 .catch(err => {
                     reject(err.response);
                 })
-                .finally(() => this.loadingState = false);
         })
     }
 

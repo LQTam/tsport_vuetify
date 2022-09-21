@@ -660,10 +660,12 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import { ValidationObserver, ValidationProvider } from "vee-validate";
 import AddImageForColor from "@/components/user/product/AddImageForColor.vue";
+import homeProductStore from '@/store/modules/homeProductStore';
+import categoryIndexStore from "@/store/modules/categoryIndexStore";
+import productSingleStore from '@/store/modules/productSingleStore';
 export default {
   components: {
     AddImageForColor,
@@ -712,9 +714,14 @@ export default {
     }
   },
   computed: {
-    ...mapGetters("HomeProduct", ["product", "relatedProducts"]),
+    product() {
+      return homeProductStore.product;
+    },
+    relatedProducts() {
+      return homeProductStore.relatedProducts;
+    },
     suppliersAll() {
-      return this.$store.getters["ProductSingle/suppliersAll"];
+      return productSingleStore.suppliersAll;
     },
     colorComp() {
       let product = this.product;
@@ -737,13 +744,13 @@ export default {
       return color;
     },
     colorsAll() {
-      return this.$store.getters["ProductSingle/colorsAll"];
+      return productSingleStore.colorsAll;
     },
     categories() {
-      return this.$store.getters["Category/categories"];
+      return categoryIndexStore.categories;
     },
     sizesAll() {
-      return this.$store.getters["ProductSingle/sizesAll"];
+      return productSingleStore.sizesAll;
     },
     cateNamesOfType() {
       let { data } = this.categories;
@@ -763,13 +770,6 @@ export default {
   },
 
   methods: {
-    ...mapActions("ProductSingle", [
-      "setProduct",
-      "update",
-      "fetchSizesAll",
-      "updateQuantity",
-      "fetchColorsAll"
-    ]),
     deleteItem() {
       this.$swal({
         title: "Are you sure?",
@@ -782,8 +782,7 @@ export default {
         reverseButtons: true
       }).then(result => {
         if (result.value) {
-          this.$store
-            .dispatch("ProductSingle/delete", this.productEdit)
+          productSingleStore.delete(this.productEdit)
             .then(({ message }) => {
               this.$awn.success(message);
               this.$router.push({ name: "collection" });
@@ -811,7 +810,7 @@ export default {
         size: { id, color_id, name },
         quantity
       } = this.productEdit;
-      await this.updateQuantity({
+      await productSingleStore.updateQuantity({
         name,
         id,
         color_id,
@@ -828,7 +827,7 @@ export default {
       this.addImageDialog = val;
     },
     editProduct() {
-      this.$store.dispatch("ProductSingle/fetchSuppliersAll");
+      productSingleStore.fetchSuppliersAll();
       this.productEdit = {
         ...this.product,
         cate_type: this.product.categories[0].parent,
@@ -844,7 +843,7 @@ export default {
       this.dialog = false;
     },
     save() {
-      this.update(this.productEdit).then(res => {
+      productSingleStore.update(this.productEdit).then(res => {
         if (res.status == 422) {
           this.addImageDialog = true;
         }
@@ -986,11 +985,10 @@ export default {
       localStorage.setItem("cart", JSON.stringify(cart));
     },
     async fetchSizeAndColor() {
-      await Promise.all([this.fetchColorsAll(), this.fetchSizesAll()]);
+      await Promise.all([productSingleStore.fetchColorsAll(), productSingleStore.fetchSizesAll()]);
     },
     fetchProd() {
-      this.$store
-        .dispatch("HomeProduct/fetch", this.url[this.url.length - 1])
+      homeProductStore.fetch(this.url[this.url.length - 1])
         .then(data => {
           // this.productEdit = {
           //   ...data,
@@ -1010,12 +1008,10 @@ export default {
   },
   mounted() {
     this.fetchSizeAndColor();
-    this.$store.dispatch("Category/fetchData");
   },
   created() {
     this.fetchProd();
-    this.$store.dispatch(
-      "HomeProduct/fetchRelatedProducts",
+    homeProductStore.fetchRelatedProducts(
       this.url[this.url.length - 1]
     );
   }

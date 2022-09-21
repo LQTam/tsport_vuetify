@@ -84,6 +84,7 @@
 </template>
 
 <script>
+import homeProductStore from '@/store/modules/homeProductStore';
 export default {
   data() {
     return {
@@ -167,8 +168,7 @@ export default {
       });
     },
     search() {
-      this.$store
-        .dispatch("HomeProduct/fetchProdsByKey", {
+      homeProductStore.fetchProdsByKey({
           key: this.searchKey,
           page: this.page
         })

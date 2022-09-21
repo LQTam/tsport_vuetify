@@ -143,7 +143,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from "vuex";
+import homeProductStore from "@/store/modules/homeProductStore";
 export default {
   data() {
     return {
@@ -189,7 +189,7 @@ export default {
   },
   mounted() {
     let { category_name, type } = this.$route.params;
-    this.fetchData({
+    homeProductStore.fetchData({
       length: 50,
       category_name,
       type,
@@ -199,10 +199,14 @@ export default {
     });
   },
   computed: {
-    ...mapGetters("HomeProduct", ["products", "fetching"]),
+    products() {
+      return homeProductStore.products;
+    },
+    fetching() {
+      return homeProductStore.fetching;
+    }
   },
   methods: {
-    ...mapActions("HomeProduct", ["fetchData"]),
     add2Cart(item, size) {
       let cart = [];
       if (localStorage.cart) {
