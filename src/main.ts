@@ -1,42 +1,27 @@
+import store from '@/store';
 import Vue from "vue";
+import '@/plugins';
 import App from "./App.vue";
 import router from "./router";
-import store from "./store";
 import vuetify from "./plugins/vuetify";
 import { abilitiesPlugin } from "@casl/vue";
 import ability from "@/config/ability";
-import VueAWN from "vue-awesome-notifications";
-import "vue-awesome-notifications/dist/styles/style.css";
 import { ValidationProvider, extend } from "vee-validate";
 import { required, email, confirmed, max_value, between, max, min, image, min_value } from "vee-validate/dist/rules";
-import VueSweetAlert2 from "vue-sweetalert2";
-import { Fragment } from "vue-fragment";
+import { Plugin } from "vue-fragment";
 import CKEditor from "@ckeditor/ckeditor5-vue";
 
-import Echo from 'laravel-echo';
-window.Pusher = require('pusher-js')
-window.Echo = new Echo({
-  broadcaster:'pusher',
-  key:'bd6c219b9cdb2685a402',
-  cluster:'ap1',
-  authEndpoint:'/broadcasting/auth',
-  encrypted:true,
-  auth:{
-    headers:{
-      Authorization:'Bearer '+sessionStorage.authToken
-    }
-  },
-  forceTLS:true
-})
+import "sweetalert2/dist/sweetalert2.min.css"
+
 extend("email", {
   ...email,
   message: "The {_field_} not valid email format."
 });
 
 extend('password', {
-  params: ['target'],
-  validate(value, { target }) {
-    return value === target;
+  params: ["target"],
+  validate(value, target: any[] | Record<string, any>) {
+    return value === target['target'];
   },
   message: 'Password confirmation does not match'
 });
@@ -75,11 +60,10 @@ extend("max_value", {
 });
 
 Vue.use(CKEditor);
-Vue.use(VueAWN, { position: "top-right" });
 Vue.use(abilitiesPlugin, ability);
-Vue.use(VueSweetAlert2);
 
-Vue.component("fragment", Fragment);
+Vue.use(Plugin);
+// Vue.component("fragment", );
 Vue.component("event-hub", require("@/components/EventHub.vue").default);
 Vue.component("vue-select", require("vue-select").default);
 Vue.component("ValidationProvider", ValidationProvider);
@@ -98,13 +82,12 @@ Vue.component(
 );
 Vue.component("home-side-bar", require("@/components/SideBar.vue").default);
 Vue.prototype.$eventHub = new Vue();
-Vue.prototype.$axios = require('axios');
 Vue.config.productionTip = false;
 if (sessionStorage.expires_in) {
   const date = new Date(sessionStorage.expires_in);
   const dateNotify = new Date(date);
   dateNotify.setMinutes(dateNotify.getMinutes() - 5);
-  sessionStorage.setItem("notifyTokenExpireBefore5Minute", dateNotify);
+  sessionStorage.setItem("notifyTokenExpireBefore5Minute", dateNotify.toString());
   setInterval(() => {
     const user = JSON.parse(sessionStorage.user)
     const dateNow = new Date();
@@ -118,31 +101,31 @@ if (sessionStorage.expires_in) {
 }
 
 new Vue({
-  data() {
-    const user = sessionStorage.user ? JSON.parse(sessionStorage.user) : {}
-    return {
-      user,
-      permissions:[],
-    }
-  },
-  watch: {
-    $route: function () {
-      this.fetchData();
-    }
-  },
-  mounted() {
-    this.fetchData();    
-  },
-  methods: {
-    async fetchData() {
-      const data = await this.$store.dispatch("Rules/fetchData");
-      this.permissions = data
-      this.$eventHub.$emit("rules-update");
-      // .then(() => this.$eventHub.$emit("rules-update"));
-    }
-  },
-  router,
+  // data() {
+  //   const user = sessionStorage.user ? JSON.parse(sessionStorage.user) : {}
+  //   return {
+  //     user,
+  //     permissions:[],
+  //   }
+  // },
+  // watch: {
+  //   $route: function () {
+  //     this.fetchData();
+  //   }
+  // },
+  // mounted() {
+  //   this.fetchData();    
+  // },
+  // methods: {
+  //   async fetchData() {
+  //     const data = await this.$store.dispatch("Rules/fetchData");
+  //     this.permissions = data
+  //     this.$root.$emit("rules-update");
+  //     // .then(() => this.$root.$emit("rules-update"));
+  //   }
+  // },
   store,
+  router,
   vuetify,
   render: h => h(App)
 }).$mount("#app");
