@@ -221,7 +221,7 @@ export default {
     },
     setCart() {
       localStorage.setItem("cart", JSON.stringify(this.cart));
-      this.$eventHub.$emit("viewCart");
+      this.$root.$emit("viewCart");
       this.viewCart();
     }
   }

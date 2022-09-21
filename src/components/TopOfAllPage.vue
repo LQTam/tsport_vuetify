@@ -73,7 +73,7 @@ export default {
           sortKeyDir:'id__desc'
         }
       }
-    this.$eventHub.$emit("filterKey", this.sortName.sortKeyDir);
+    this.$root.$emit("filterKey", this.sortName.sortKeyDir);
   },
   watch: {
     $route: function() {
@@ -87,7 +87,7 @@ export default {
           sortKeyDir:'id__desc'
         }
       }
-      this.$eventHub.$emit("filterKey", this.sortName.sortKeyDir);
+      this.$root.$emit("filterKey", this.sortName.sortKeyDir);
     }
   },
   methods: {
@@ -99,7 +99,7 @@ export default {
         length: 50,
         key: key.sortKeyDir
       });
-      this.$eventHub.$emit("filterKey", key.sortKeyDir);
+      this.$root.$emit("filterKey", key.sortKeyDir);
     }
   }
 };

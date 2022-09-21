@@ -297,7 +297,7 @@ export default {
           this.setProduct(item);
           this.delete().then(res => {
             console.log(res);
-            this.$eventHub.$emit("delete-success");
+            this.$root.$emit("delete-success");
           });
         }
       });
@@ -319,7 +319,7 @@ export default {
           if (res.status == 422) {
             this.dialog = true;
           }
-          this.$eventHub.$emit("update-success");
+          this.$root.$emit("update-success");
           this.dialog = false;
           this.isEdit = false;
         });
@@ -329,7 +329,7 @@ export default {
             this.dialog = true;
           }
           if (res.status == 201) {
-            this.$eventHub.$emit("create-success");
+            this.$root.$emit("create-success");
             this.dialog = false;
             this.images = [];
           }

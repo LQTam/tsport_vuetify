@@ -944,7 +944,7 @@ export default {
         cart.push(product);
         this.setCart(cart);
       }
-      this.$eventHub.$emit("changeCartDrawer", true);
+      this.$root.$emit("changeCartDrawer", true);
     },
     add2Cart() {
       if (this.sizeSelected) {
@@ -976,7 +976,7 @@ export default {
             cart.push(product);
             this.setCart(cart);
           }
-          this.$eventHub.$emit("changeCartDrawer", true);
+          this.$root.$emit("changeCartDrawer", true);
         }
       } else {
         this.$awn.warning("Please select a size.");
