@@ -109,6 +109,7 @@
 </template>
 
 <script>
+import { Swal } from '@/utils';
 export default {
   data() {
     return {
@@ -131,7 +132,7 @@ export default {
     },
     confirmUpdateOrDelete(product, type = "delete") {
       if (type == "delete") {
-        this.$swal({
+        Swal.fire({
           title: "Are you sure?",
           text: `You won't revert this action!`,
           icon: "warning",
@@ -149,7 +150,7 @@ export default {
         });
       }
       if (type == "update") {
-        this.$swal({
+        Swal.fire({
           title: "Are you sure?",
           text: `Change quantity less than 1 will be delete!`,
           icon: "warning",

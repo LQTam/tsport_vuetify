@@ -138,7 +138,7 @@
 </template>
 
 <script>
-import { apiURL } from "@/utils";
+import { apiURL, Swal } from "@/utils";
 export default {
   data: () => ({
     parentClick: false,
@@ -216,7 +216,7 @@ export default {
       return group.findIndex(g => g.id == id);
     },
     deleteItem(item) {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

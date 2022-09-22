@@ -78,7 +78,7 @@ export const convertArrayToFormData = (form_data: FormData, values: any, name: s
   return form_data;
 };
 
-export { Swal};
+export { Swal };
 
 export const REDIS_PREFIX = "";
 export const REDIS_PREFIX_PRIVATE = REDIS_PREFIX + "private-";

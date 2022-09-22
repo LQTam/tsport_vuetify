@@ -160,7 +160,7 @@ export default {
       let { category_name, type } = this.$route.params;
       this.size = null;
       this.key = null;
-      this.fetchData({
+      homeProductStore.fetchData({
         length: 50,
         category_name,
         type,
@@ -171,7 +171,7 @@ export default {
     },
     page: function(val) {
       let { category_name, type } = this.$route.params;
-      this.fetchData({
+      homeProductStore.fetchData({
         length: 50,
         category_name,
         type,

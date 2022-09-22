@@ -527,8 +527,8 @@
 </template>
 
 <script>
+import { Swal } from '@/utils';
 import SearchProduct from "@/components/SearchProduct.vue";
-import Axios from 'axios';
 import homeProductStore from './store/modules/homeProductStore';
 import userSingleStore from './store/modules/userSingleStore';
 export default {
@@ -649,7 +649,7 @@ export default {
         .catch((err) => console.log(err));
     },
     logout() {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `Your session will be done!`,
         icon: "warning",
@@ -675,7 +675,7 @@ export default {
     },
     confirmUpdateOrDelete(product, type = "delete") {
       if (type == "delete") {
-        this.$swal({
+        Swal.fire({
           title: "Are you sure?",
           text: `You won't revert this action!`,
           icon: "warning",
@@ -693,7 +693,7 @@ export default {
         });
       }
       if (type == "update") {
-        this.$swal({
+        Swal.fire({
           title: "Are you sure?",
           text: `Change quantity less than 1 will be delete!`,
           icon: "warning",
@@ -781,7 +781,7 @@ export default {
       this.viewCart();
     });
     
-      Axios.get("http://localhost:8000/api/categories", {
+      this.$http.get("http://localhost:8000/api/categories", {
         params: { showData: true },
       })
       .then(({ data }) => {

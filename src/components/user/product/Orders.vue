@@ -135,6 +135,7 @@
 </template>
 
 <script>
+import { Swal } from '@/utils';
 import { mapGetters } from "vuex";
 export default {
   data: () => ({
@@ -196,7 +197,7 @@ export default {
 
   methods: {
     deleteItem(item) {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

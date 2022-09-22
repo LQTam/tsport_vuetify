@@ -114,6 +114,7 @@
 <script>
 import { ValidationProvider } from "vee-validate";
 import AddImageForColor from "@/components/user/product/AddImageForColor.vue";
+import { Swal } from '@/utils';
 export default {
   components: {
     ValidationProvider,
@@ -164,7 +165,7 @@ export default {
       this.productEdit.color_name = this.product.color;
     },
     deleteSelectedItem() {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

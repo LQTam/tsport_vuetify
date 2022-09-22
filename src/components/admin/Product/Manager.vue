@@ -165,6 +165,7 @@
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import Pagination1 from "@/components/admin/Pagination1.vue";
 import { mapGetters, mapActions } from "vuex";
+import { Swal } from '@/utils';
 export default {
   name: "products",
   components: { Pagination1 },
@@ -283,7 +284,7 @@ export default {
       this.isEdit = true;
     },
     deleteItem(item) {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

@@ -177,6 +177,7 @@
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 import Pagination1 from "@/components/admin/Pagination1.vue";
 import { mapGetters, mapActions } from "vuex";
+import { Swal } from '@/utils';
 export default {
   name: "users",
   components: { Pagination1, ValidationObserver, ValidationProvider },
@@ -300,7 +301,7 @@ export default {
       this.fetchData({ ...this.options, role_name: role.name });
     },
     deleteItem(item) {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

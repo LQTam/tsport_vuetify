@@ -212,7 +212,7 @@
 
 <script>
 import { ValidationProvider, ValidationObserver } from "vee-validate";
-import { apiURL, convertObjectToFormData } from "@/utils";
+import { apiURL, convertObjectToFormData, Swal } from "@/utils";
 const INIT_QUERY = {
   groupDesc: [],
   itemsPerPage: 10,
@@ -360,7 +360,7 @@ export default {
       this.previewLogo = "";
     },
     deleteItem(item) {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

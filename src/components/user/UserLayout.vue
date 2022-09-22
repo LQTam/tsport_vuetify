@@ -187,6 +187,7 @@ import {Component, Prop, Vue, Watch} from "vue-property-decorator";
 import { UserResource } from "@/models";
 import socketStore from "@/store/modules/socketStore";
 import notificationStore from "@/store/modules/notifications";
+import { Swal } from "@/utils";
 @Component({
   components: {EventHub}
 })
@@ -284,7 +285,7 @@ export default class UserLayout extends Vue {
   }
 
   logout() {
-    this.$swal.fire({
+    Swal.fire({
       title: "Are you sure?",
       text: `Your session will be done!`,
       icon: "warning",

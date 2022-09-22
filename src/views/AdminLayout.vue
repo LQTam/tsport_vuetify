@@ -166,6 +166,7 @@
 
 <script>
 import EventHub from "@/components/EventHub.vue";
+import { Swal } from '@/utils';
 export default {
   components: {
     EventHub
@@ -188,7 +189,7 @@ export default {
   },
   methods: {
     logout() {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `Your session will be done!`,
         icon: "warning",

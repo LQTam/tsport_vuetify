@@ -431,6 +431,7 @@ import Pagination1 from "@/components/admin/Pagination1.vue";
 // import AddImageProdColor from "@/components/user/product/AddImageForColor.vue";
 import { mapGetters, mapActions } from "vuex";
 import { ValidationObserver, ValidationProvider } from "vee-validate";
+import { Swal } from '@/utils';
 export default {
   name: "products",
   components: {
@@ -697,7 +698,7 @@ export default {
       this.isEdit = true;
     },
     deleteItem(item) {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

@@ -122,7 +122,7 @@
 <script>
 import DataTable from "@/components/admin/Table.vue";
 import Pagination from "@/components/admin/Pagination.vue";
-import { getIndex } from "@/utils";
+import { getIndex, Swal } from "@/utils";
 import { mapGetters, mapActions } from "vuex";
 export default {
   components: { DataTable, Pagination },
@@ -246,7 +246,7 @@ export default {
       }
     },
     deleteItem(item) {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",

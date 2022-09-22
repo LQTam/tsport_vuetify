@@ -666,6 +666,7 @@ import AddImageForColor from "@/components/user/product/AddImageForColor.vue";
 import homeProductStore from '@/store/modules/homeProductStore';
 import categoryIndexStore from "@/store/modules/categoryIndexStore";
 import productSingleStore from '@/store/modules/productSingleStore';
+import { Swal } from '@/utils';
 export default {
   components: {
     AddImageForColor,
@@ -771,7 +772,7 @@ export default {
 
   methods: {
     deleteItem() {
-      this.$swal({
+      Swal.fire({
         title: "Are you sure?",
         text: `You won't be able to revert this!`,
         icon: "warning",
