@@ -137,6 +137,7 @@
 <script>
 import { Swal } from '@/utils';
 import { mapGetters } from "vuex";
+import orderIndexStore from '@/store/modules/orderStore';
 export default {
   data: () => ({
     dialog: false,
@@ -183,7 +184,7 @@ export default {
 
   created() {
     this.$root.$on("fetchOrders", (madh) => {
-      this.$store.dispatch("OrderIndex/fetchData").then(({ data }) => {
+      orderIndexStore.fetchData().then(({ data }) => {
         let item = data.filter((item) => item.madh === madh)[0];
         if (item) this.viewOrderDetail(item);
         else {
@@ -192,7 +193,7 @@ export default {
         }
       });
     });
-    this.$store.dispatch("OrderIndex/fetchData");
+    orderIndexStore.fetchData();
   },
 
   methods: {
@@ -208,8 +209,7 @@ export default {
         reverseButtons: true,
       }).then((result) => {
         if (result.value) {
-          this.$store
-            .dispatch("OrderIndex/delete", item)
+          orderIndexStore.delete(item)
             .then(({ message }) => this.$awn.success(message));
         }
       });
@@ -217,7 +217,7 @@ export default {
     async confirmOrder(item) {
       let order = { madh: item.madh };
       this.$awn.success("Success sent confirm order email to customer.");
-      await this.$store.dispatch("OrderIndex/confirmOrder", order);
+      await orderIndexStore.confirmOrder(order);
       // .then(({ message }) => this.$awn.success(message));
     },
     viewOrderDetail(item) {
@@ -234,7 +234,7 @@ export default {
       this.$awn.success(
         "Success sent notify order out of stock mail to customer."
       );
-      await this.$store.dispatch("OrderIndex/outOfStock", item);
+      await orderIndexStore.outOfStock(item);
       // .then(({ message }) => this.$awn.success(message));
     },
 

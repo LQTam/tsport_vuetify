@@ -110,6 +110,7 @@
 
 <script>
 import { Swal } from '@/utils';
+import orderIndexStore from '@/store/modules/orderStore';
 export default {
   data() {
     return {
@@ -127,7 +128,7 @@ export default {
     async fetchOrdersByUserID(uid) {
       let {
         data: { orders }
-      } = await this.$store.dispatch("OrderIndex/fetchOrdersByUserID", uid);
+      } = await orderIndexStore.fetchOrdersByUserID(uid);
       this.orders = orders;
     },
     confirmUpdateOrDelete(product, type = "delete") {

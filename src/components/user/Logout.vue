@@ -3,9 +3,10 @@
 </template>
 
 <script>
+import userSingleStore from '@/store/modules/userSingleStore'
 export default {
   created() {
-    this.$store.dispatch("UserSingle/logout").then(() => {
+    userSingleStore.logout().then(() => {
       window.location.href='/login'
     });
   }

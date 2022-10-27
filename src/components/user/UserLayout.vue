@@ -188,6 +188,7 @@ import { UserResource } from "@/models";
 import socketStore from "@/store/modules/socketStore";
 import notificationStore from "@/store/modules/notifications";
 import { Swal } from "@/utils";
+import userSingleStore from "@/store/modules/userSingleStore";
 @Component({
   components: {EventHub}
 })
@@ -270,8 +271,7 @@ export default class UserLayout extends Vue {
       let index = this.notifications.findIndex(
         (notify: any) => notify.data.madh === madh
       );
-      this.$store
-        .dispatch("Notification/delete", {
+      notificationStore.delete({
           user_id: this.$root["user"]["id"],
           notify: this.notifications[index]
         })
@@ -296,7 +296,7 @@ export default class UserLayout extends Vue {
       reverseButtons: true
     }).then(result => {
       if (result.value) {
-        this.$store.dispatch("UserSingle/logout").then(() => {
+       userSingleStore.logout().then(() => {
           window.location.href = "/login";
         });
       }

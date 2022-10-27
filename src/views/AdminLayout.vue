@@ -166,6 +166,7 @@
 
 <script>
 import EventHub from "@/components/EventHub.vue";
+import userSingleStore from "@/store/modules/userSingleStore";
 import { Swal } from '@/utils';
 export default {
   components: {
@@ -200,7 +201,7 @@ export default {
         reverseButtons: true
       }).then(result => {
         if (result.value) {
-          this.$store.dispatch("UserSingle/logout").then(() => {
+          userSingleStore.logout().then(() => {
             window.location.href = "/login";
           });
         }

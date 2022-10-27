@@ -311,6 +311,7 @@
 <script>
 import { apiURL } from "@/utils";
 import { ValidationProvider, ValidationObserver } from "vee-validate";
+import userSingleStore from '@/store/modules/userSingleStore';
 export default {
   //component code
   components: {
@@ -381,7 +382,7 @@ export default {
   },
   methods: {
     async me() {
-      let data = await this.$store.dispatch("UserSingle/me");
+      let data = await userSingleStore.me();
       this.customer = data.customer;
     },
     fetchShippings() {

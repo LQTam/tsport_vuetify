@@ -115,6 +115,8 @@
 import { ValidationProvider } from "vee-validate";
 import AddImageForColor from "@/components/user/product/AddImageForColor.vue";
 import { Swal } from '@/utils';
+import productSingleStore from '@/store/modules/productSingleStore';
+import pictureStore from '@/store/modules/pictureStore';
 export default {
   components: {
     ValidationProvider,
@@ -135,8 +137,7 @@ export default {
     }
   },
   created() {
-    this.$store
-      .dispatch("ProductSingle/fetch", {
+    productSingleStore.fetch({
         id: this.$route.params.product_id
       })
       .then(({ data }) => {
@@ -149,8 +150,8 @@ export default {
       });
   },
   mounted() {
-    this.$store.dispatch("ProductSingle/fetchSizesAll");
-    this.$store.dispatch("ProductSingle/fetchColorsAll");
+    productSingleStore.fetchSizesAll();
+    productSingleStore.fetchColorsAll();
   },
   methods: {
     fetchImage() {
@@ -176,11 +177,10 @@ export default {
         reverseButtons: true
       }).then(result => {
         if (result.value) {
-          this.$store
-            .dispatch("ColorPicture/deleteSelectedItem", this.selected)
+          pictureStore.deleteSelectedItem(this.selected)
             .then(data => {
               this.$awn.success(data.message);
-              this.$store.dispatch("ProductSingle/fetch", this.product);
+              productSingleStore.fetch(this.product);
               this.selected = [];
             });
         }
@@ -215,16 +215,16 @@ export default {
   },
   computed: {
     sizesAll() {
-      return this.$store.getters["ProductSingle/sizesAll"];
+      return productSingleStore.sizesAll;
     },
     colorsAll() {
-      return this.$store.getters["ProductSingle/colorsAll"];
+      return productSingleStore.colorsAll;
     },
     images() {
-      return this.$store.getters["ColorPicture/picture"];
+      return pictureStore.picture;
     },
     product() {
-      return this.$store.getters["ProductSingle/product"];
+      return productSingleStore.product;
     },
     colorComp() {
       let product = this.product;

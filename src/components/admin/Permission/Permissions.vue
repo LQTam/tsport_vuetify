@@ -123,7 +123,9 @@
 import DataTable from "@/components/admin/Table.vue";
 import Pagination from "@/components/admin/Pagination.vue";
 import { getIndex, Swal } from "@/utils";
-import { mapGetters, mapActions } from "vuex";
+import permissionIndexStore from '@/store/modules/permissionIndexStore';
+import permissionSingleStore from '@/store/modules/permissionSingleStore';
+import appStore from '@/store/modules/appStore';
 export default {
   components: { DataTable, Pagination },
   data() {
@@ -159,26 +161,27 @@ export default {
     };
   },
   created() {
-    this.options = this.query;
+    this.options = permissionSingleStore.query;
   },
   mounted(){
-    this.$store.dispatch("PermissionSingle/fetchData");
+    permissionSingleStore.fetchData();
   },
   computed: {
-    ...mapGetters("PermissionIndex", ["permissions", "query", "fetching"]),
-    ...mapGetters("PermissionSingle", ["permission"]),
+    fetching() {
+      return permissionSingleStore.fetching;
+    },
     formTitle() {
       return this.isEdit ? "Edit Item" : "Create Item";
     },
     permissions(){
-      return this.$store.getters["PermissionIndex/permissions"];
+      return permissionIndexStore.permissions;
     }
   },
   watch: {
     options: {
       handler: function(query) {
-        this.setQuery(query);
-        this.fetchData();
+        permissionIndexStore.setQuery(query);
+        permissionIndexStore.fetchData();
       },
       deep: true
     },
@@ -187,20 +190,14 @@ export default {
     }
   },
   destroyed() {
-    this.resetState();
+    permissionIndexStore.resetState();
   },
   methods: {
-    ...mapActions("PermissionIndex", ["fetchData", "setQuery", "resetState"]),
-    ...mapActions("PermissionSingle", [
-      "setPermission",
-      "updateName",
-      "fetch",
-      "store",
-      "update",
-      "delete"
-    ]),
+    updateName(name) {
+      permissionSingleStore.updateName(name);
+    },
     refreshData() {
-      this.fetchData({
+      permissionIndexStore.fetchData({
         page: 1,
         length: 10,
         search: "",
@@ -209,13 +206,13 @@ export default {
       });
     },
     refreshForm() {
-      this.setPermission();
-      this.dialog = false;
+      permissionSingleStore.setPermission();
+      permissionSingleStore.dialog = false;
       this.isEdit = false;
     },
     editItem(item) {
-      this.setPermission(item);
-      this.fetch();
+      permissionSingleStore.setPermission(item);
+      permissionSingleStore.fetch();
       this.dialog = true;
       this.isEdit = true;
     },
@@ -224,21 +221,21 @@ export default {
     },
     save() {
       if (this.isEdit) {
-        this.update().then(res => {
+        permissionSingleStore.update().then(res => {
           if (res.status == 422) {
             this.dialog = true;
           }
-          this.$awn.success('Your permission has been update successfull.')
+          appStore.toastQueue.add({text: 'Your permission has been update successfull.', color: 'success'})
           this.dialog = false;
           this.isEdit = false;
         });
       } else {
-        this.store().then(res => {
+        permissionSingleStore.createPermission().then(res => {
           if (res.status == 422) {
             this.dialog = true;
           }
           if (res.status == 201) {
-            this.$awn.success('Your permission has been create successfull.')
+            appStore.toastQueue.add({text: 'Your permission has been create successfull.', color: 'success'})
             this.dialog = false;
           }
           this.isEdit = false;
@@ -257,9 +254,9 @@ export default {
         reverseButtons: true
       }).then(result => {
         if (result.value) {
-          this.setPermission(item);
-          this.delete().then(() => {
-            this.$awn.success("Your permission has been deleted.");
+          permissionSingleStore.setPermission(item);
+          permissionSingleStore.delete().then(() => {
+            appStore.toastQueue.add({text: "Your permission has been deleted.", color: 'success'});
           });
         }
       });
@@ -274,7 +271,7 @@ export default {
       this.options.search = value;
     },
     paginateValue(value) {
-      this.resetState();
+      permissionIndexStore.resetState();
       this.options.search=""
       this.options.length = value;
     },

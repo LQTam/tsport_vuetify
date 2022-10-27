@@ -137,8 +137,9 @@
 <script>
 import DataTable from "@/components/admin/Table.vue";
 import Pagination from "@/components/admin/Pagination.vue";
-import { mapActions, mapGetters } from "vuex";
 import { getIndex, Swal } from "@/utils";
+import roleSingleStore from '@/store/modules/roleSingleStore';
+import roleIndexStore from '@/store/modules/roleIndexStore';
 export default {
   components: {
     DataTable,
@@ -180,7 +181,7 @@ export default {
     };
   },
   created() {
-    this.$store.dispatch("RoleSingle/fetchPermisisonsAll");
+    roleSingleStore.fetchPermisisonsAll();
     this.options = this.query;
   },
   watch: {
@@ -196,26 +197,56 @@ export default {
     }
   },
   computed: {
-    ...mapGetters("RoleIndex", ["roles", "query", "fetching"]),
-    ...mapGetters("RoleSingle", ["role", "permissionsAll"]),
+    roles() {
+      return roleIndexStore.roles;
+    },
+    query() {
+      return roleIndexStore.query;
+    },
+    fetching() {
+      return roleIndexStore.fetching;
+    },
     formTitle() {
       return this.isEdit ? "Edit Role" : "Create Role";
+    },
+    permissionsAll() {
+      return roleSingleStore.permissionsAll;
     }
   },
   destroyed() {
     this.resetState();
   },
   methods: {
-    ...mapActions("RoleIndex", ["fetchData", "resetState", "setQuery"]),
-    ...mapActions("RoleSingle", [
-      "updateName",
-      "fetch",
-      "updatePermission",
-      "setRole",
-      "update",
-      "store",
-      "delete"
-    ]),
+    updateName(value) {
+      roleSingleStore.updateName(value);
+    },
+    fetch() {
+      roleSingleStore.fetch();
+    },
+    updatePermission(value) {
+      roleSingleStore.updatePermission(value);
+    },
+    setRole(value) {
+      roleSingleStore.setRole(value);
+    },
+    update(value) {
+      roleSingleStore.update(value);
+    },
+    store(value) {
+      roleSingleStore.createRole(value);
+    },
+    delete(value) {
+      roleSingleStore.delete(value);
+    },
+    fetchData() {
+      roleIndexStore.fetchData();
+    },
+    resetState() {
+      roleIndexStore.resetState();
+    },
+    setQuery() {
+      roleIndexStore.setQuery();
+    },
     refreshForm() {
       this.setRole();
       this.isEdit = false;

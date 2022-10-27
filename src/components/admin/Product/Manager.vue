@@ -164,8 +164,10 @@
 <script>
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import Pagination1 from "@/components/admin/Pagination1.vue";
-import { mapGetters, mapActions } from "vuex";
 import { Swal } from '@/utils';
+import alertStore from '@/store/modules/alert';
+import productSingleStore from '@/store/modules/productSingleStore';
+import productIndexStore from '@/store/modules/productIndexStore';
 export default {
   name: "products",
   components: { Pagination1 },
@@ -207,10 +209,26 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("ProductIndex", ["products", "query", "fetching"]),
-    ...mapGetters("ProductSingle", ["product", "colorsAll", "sizesAll"]),
     formTitle() {
       return this.isEdit == true ? "Edit Item" : "New Item";
+    },
+    product() {
+      return productSingleStore.product;
+    },
+    colorsAll() {
+      return productSingleStore.colorsAll;
+    },
+    sizesAll() {
+      return productSingleStore.sizesAll;
+    },
+    query() {
+      return productIndexStore.query;
+    },
+    fetching() {
+      return productIndexStore.fetching;
+    },
+    products() {
+      return productIndexStore.products;
     },
     lengthComp() {
       return this.products.meta.last_page;
@@ -225,8 +243,8 @@ export default {
   watch: {
     options: {
       handler: function(options) {
-        this.setQuery(options);
-        this.fetchData();
+        productSingleStore.setQuery(options);
+        productIndexStore.fetchData();
       },
       deep: true
     },
@@ -240,28 +258,32 @@ export default {
     this.fetchColorsAll();
   },
   destroyed() {
-    this.resetState();
+    productSingleStore.resetState();
   },
   methods: {
-    ...mapActions("ProductIndex", ["fetchData", "setQuery"]),
-    ...mapActions("ProductSingle", [
-      "fetch",
-      "store",
-      "update",
-      "delete",
-      "resetState",
-      "setProduct",
-      "updateProdName",
-      "updateProdPrice",
-      "updateProdDescription",
-      "updateProdSize",
-      "updateProdColor",
-      "updateProdImage",
-      "fetchSizesAll",
-      "fetchColorsAll"
-    ]),
     show(img) {
       window.open(img);
+    },
+    updateProdName(value) {
+      productSingleStore.updateProdName(value);
+    },
+    updateProdPrice(value) {
+      productSingleStore.updateProdPrice(value);
+    },
+    updateProdDescription(value) {
+      productSingleStore.updateProdDescription(value);
+    },
+    updateProdSize(value) {
+      productSingleStore.updateProdSize(value);
+    },
+    updateProdColor(value) {
+      productSingleStore.updateProdColor(value);
+    },
+    fetchSizesAll(value) {
+      productSingleStore.fetchSizesAll(value);
+    },
+    fetchColorsAll() {
+      productSingleStore.fetchColorsAll();
     },
     previewImage(e) {
       let imageURL = [];
@@ -269,17 +291,17 @@ export default {
         imageURL.push(URL.createObjectURL(img));
       });
       this.imagesUrl = imageURL;
-      this.updateProdImage(e);
+      productSingleStore.updateProdImage(e);
     },
     async fetchSizeAndColor() {
       await Promise.all([this.fetchColorsAll(), this.fetchSizesAll()]);
     },
     refreshForm() {
-      this.setProduct();
-      this.$store.dispatch("Alert/resetState");
+      productSingleStore.setProduct();
+      alertStore.resetState();
     },
     editItem(item) {
-      this.fetch(item);
+      productSingleStore.fetch(item);
       this.dialog = true;
       this.isEdit = true;
     },
@@ -295,8 +317,8 @@ export default {
         reverseButtons: true
       }).then(result => {
         if (result.value) {
-          this.setProduct(item);
-          this.delete().then(res => {
+          productSingleStore.setProduct(item);
+          productSingleStore.delete().then(res => {
             console.log(res);
             this.$root.$emit("delete-success");
           });
@@ -316,7 +338,7 @@ export default {
     },
     save() {
       if (this.isEdit) {
-        this.update().then(res => {
+        productSingleStore.update().then(res => {
           if (res.status == 422) {
             this.dialog = true;
           }
@@ -325,7 +347,7 @@ export default {
           this.isEdit = false;
         });
       } else {
-        this.store().then(res => {
+        productSingleStore.createProduct().then(res => {
           if (res.status == 422) {
             this.dialog = true;
           }
@@ -338,9 +360,12 @@ export default {
         });
       }
     },
+    fetchData() {
+      productSingleStore.fetchData();
+    },
     searchData(e) {
       const { itemsPerPage, sortBy, sortDesc } = this.query;
-      this.fetchData({
+      productSingleStore.fetchData({
         itemsPerPage,
         sortBy,
         sortDesc,

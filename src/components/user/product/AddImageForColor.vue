@@ -61,6 +61,8 @@
 
 <script>
 import { ValidationObserver, ValidationProvider } from "vee-validate";
+import productSingleStore from '@/store/modules/productSingleStore';
+import pictureStore from '@/store/modules/pictureStore';
 export default {
   components: {
     ValidationProvider,
@@ -88,7 +90,7 @@ export default {
   },
   computed: {
     sizesAll() {
-      return this.$store.getters["ProductSingle/sizesAll"];
+      return productSingleStore.sizesAll;
     },
     addImageDialogComp: {
       get() {
@@ -114,14 +116,11 @@ export default {
         image: this.productEdit.image,
         imageType: this.productEdit.imageType
       };
-      // await this.$store.dispatch("ProductSingle/update", product);
-      this.$store
-        .dispatch("ColorPicture/addImageForColorProduct", product)
+      pictureStore.addImageForColorProduct(product)
         .then(({ message }) => {
           this.$awn.success(message);
         });
-      this.$store.dispatch("ProductSingle/fetch", product);
-      // this.$store.dispatch("ProductSingle/fetch",product)
+      productSingleStore.fetch(product);
       this.$emit("addImageDialogChange", false);
     },
     close() {

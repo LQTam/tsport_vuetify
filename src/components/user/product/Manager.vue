@@ -429,9 +429,13 @@
 import ClassicEditor from "@ckeditor/ckeditor5-build-classic";
 import Pagination1 from "@/components/admin/Pagination1.vue";
 // import AddImageProdColor from "@/components/user/product/AddImageForColor.vue";
-import { mapGetters, mapActions } from "vuex";
 import { ValidationObserver, ValidationProvider } from "vee-validate";
 import { Swal } from '@/utils';
+import categoryIndexStore from '@/store/modules/categoryIndexStore';
+import productSingleStore from '@/store/modules/productSingleStore';
+import supplierStore from '@/store/modules/supplier';
+import alertStore from '@/store/modules/alert';
+import productIndexStore from '@/store/modules/productIndexStore';
 export default {
   name: "products",
   components: {
@@ -492,15 +496,29 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("ProductIndex", ["products", "query", "fetching"]),
-    ...mapGetters("ProductSingle", [
-      "product",
-      "colorsAll",
-      "sizesAll",
-      "suppliersAll"
-    ]),
+    products() {
+      return productIndexStore.products;
+    },
+    query() {
+      return productIndexStore.query;
+    },
+    fetching() {
+      return productIndexStore.fetching;
+    },
+    product() {
+      return productSingleStore.product;
+    },
+    colorsAll() {
+      return productSingleStore.colorsAll;
+    },
+    sizesAll() {
+      return productSingleStore.sizesAll;
+    },
+    suppliersAll() {
+      return productSingleStore.suppliersAll;
+    },
     categories() {
-      return this.$store.getters["Category/categories"];
+      return categoryIndexStore.categories;
     },
     formTitle() {
       return this.isEdit == true ? "Edit Item" : "New Item";
@@ -512,7 +530,7 @@ export default {
       return this.products.meta.current_page;
     },
     filterSizeByColor() {
-      let product = this.$store.getters["ProductSingle/product"];
+      let product = productSingleStore.product;
       let color = [];
       if (this.productEdit.color_name) {
         color = product.color.filter(
@@ -558,27 +576,45 @@ export default {
   },
   mounted() {
     this.fetchSizeAndColor();
-    this.$store.dispatch("ProductSingle/fetchSuppliersAll");
-    this.$store.dispatch("Category/fetchData", { showData: true });
+    productSingleStore.fetchSuppliersAll();
+    categoryIndexStore.fetchData({ showData: true });
   },
   destroyed() {
     this.resetState();
   },
   methods: {
-    ...mapActions("ProductIndex", ["fetchData", "setQuery"]),
-    ...mapActions("ProductSingle", [
-      "fetch",
-      "store",
-      "update",
-      "delete",
-      "resetState",
-      "setProduct",
-      "fetchSizesAll",
-      "fetchColorsAll"
-    ]),
+    fetchData() {
+      productIndexStore.fetchData();
+    },
+    setQuery() {
+      productIndexStore.setQuery();
+    },
+    fetch(value) {
+      productSingleStore.fetch(value);
+    },
+    store(value) {
+      productSingleStore.createProduct(value);
+    },
+    update(value) {
+      productSingleStore.update(value);
+    },
+    delete(value) {
+      productSingleStore.delete(value);
+    },
+    resetState() {
+      productSingleStore.resetState();
+    },
+    setProduct(value) {
+      productSingleStore.setProduct(value);
+    },
+    fetchSizesAll() {
+      productSingleStore.fetchSizesAll();
+    },
+    fetchColorsAll() {
+      productSingleStore.fetchColorsAll();
+    },
     updateProdStatus(item) {
-      this.$store
-        .dispatch("ProductSingle/updateProdStatus", {
+      productSingleStore.updateProdStatus({
           id: item.id,
           product_available: item.product_available
         })
@@ -590,15 +626,14 @@ export default {
         ...this.category,
         parent: this.productEdit.cate_type.id
       };
-      this.$store.dispatch("Category/store", category).then(({ message }) => {
+      categoryIndexStore.store(category).then(({ message }) => {
         this.$awn.success(message);
         this.category = {};
         this.categoryNameDialog = false;
       });
     },
     createSupplier() {
-      this.$store
-        .dispatch("Supplier/store", this.supplier)
+      supplierStore.store(this.supplier)
         .then(({ message }) => {
           this.$awn.success(message);
           this.supplierDialog = false;
@@ -607,7 +642,7 @@ export default {
     filterQuantityBySize() {
       let quantity = 0;
       if (this.productEdit.size) {
-        let product = this.$store.getters["ProductSingle/product"];
+        let product = productSingleStore.product;
         let color = product.color.filter(
           c => c.name == this.productEdit.color_name.name
         )[0];
@@ -623,8 +658,7 @@ export default {
         size: { id, color_id, name },
         quantity
       } = this.productEdit;
-      this.$store
-        .dispatch("ProductSingle/updateQuantity", {
+      productSingleStore.updateQuantity({
           name,
           id,
           color_id,
@@ -656,7 +690,7 @@ export default {
           imageType: "url"
         };
       });
-      this.$store.dispatch("ProductSingle/fetchSizesAll");
+      productSingleStore.fetchSizesAll();
       this.addImageDialog = true;
     },
     clearCateName() {
@@ -682,7 +716,7 @@ export default {
       this.dialog = false;
       this.isEdit = false;
       this.addImageDialog = false;
-      this.$store.dispatch("Alert/resetState");
+      alertStore.resetState();
     },
     editItem(item) {
       this.fetch(item).then(({ data }) => {

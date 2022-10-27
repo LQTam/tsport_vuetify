@@ -176,8 +176,10 @@
 <script>
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 import Pagination1 from "@/components/admin/Pagination1.vue";
-import { mapGetters, mapActions } from "vuex";
 import { Swal } from '@/utils';
+import alertStore from '@/store/modules/alert';
+import userSingleStore from '@/store/modules/userSingleStore';
+import userIndexStore from '@/store/modules/userIndexStore';
 export default {
   name: "users",
   components: { Pagination1, ValidationObserver, ValidationProvider },
@@ -215,8 +217,21 @@ export default {
     };
   },
   computed: {
-    ...mapGetters("UserIndex", ["users", "query", "fetching"]),
-    ...mapGetters("UserSingle", ["rolesAll", "user"]),
+    users() {
+      return userIndexStore.users;
+    },
+    query() {
+      return userIndexStore.query;
+    },
+    fetching() {
+      return userIndexStore.fetching;
+    },
+    rolesAll() {
+      return userSingleStore.rolesAll;
+    },
+    user() {
+      return userSingleStore.user;
+    },
     formTitle() {
       return this.isEdit == true ? "Edit Item" : "New Item";
     },
@@ -243,25 +258,48 @@ export default {
     }
   },
   created() {
-    this.$store.dispatch("UserSingle/fetchRolesAll");
+    userSingleStore.fetchRolesAll();
   },
   destroyed() {
     this.resetState();
   },
   methods: {
-    ...mapActions("UserIndex", ["fetchData", "setQuery"]),
-    ...mapActions("UserSingle", [
-      "fetch",
-      "store",
-      "update",
-      "delete",
-      "resetState",
-      "setUser",
-      "updateRole",
-      "updateName",
-      "updateEmail",
-      "updatePassword"
-    ]),
+    fetch() {
+      userSingleStore.fetch();
+    },
+    store(value) {
+      userSingleStore.createUser(value);
+    },
+    update(value) {
+      userSingleStore.update(value);
+    },
+    delete(value) {
+      userSingleStore.delete(value);
+    },
+    resetState() {
+      userSingleStore.resetState();
+    },
+    setUser(value) {
+      userSingleStore.setUser(value);
+    },
+    updateRole(value) {
+      userSingleStore.updateRole(value);
+    },
+    updateName(value) {
+      userSingleStore.updateName(value);
+    },
+    updateEmail(value) {
+      userSingleStore.updateEmail(value);
+    },
+    updatePassword(value) {
+      userSingleStore.updatePassword(value);
+    },
+    fetchData() {
+      return userIndexStore.fetchData();
+    },
+    fetchQuery() {
+      return userIndexStore.setQuery();
+    },
     refreshData() {
       this.fetchData({
         page: 1,
@@ -290,7 +328,7 @@ export default {
     refreshForm() {
       this.setUser();
       this.isEdit = false;
-      this.$store.dispatch("Alert/resetState");
+      alertStore.resetState();
     },
     editItem(item) {
       this.fetch(item);

@@ -213,6 +213,7 @@
 <script>
 import { ValidationProvider, ValidationObserver } from "vee-validate";
 import { apiURL, convertObjectToFormData, Swal } from "@/utils";
+import productSingleStore from '@/store/modules/productSingleStore';
 const INIT_QUERY = {
   groupDesc: [],
   itemsPerPage: 10,
@@ -280,7 +281,7 @@ export default {
       return this.isEdit ? "Edit Item" : "New Item";
     },
     suppliersAll() {
-      return this.$store.getters["ProductSingle/suppliersAll"];
+      return productSingleStore.suppliersAll;
     }
   },
 
@@ -288,7 +289,7 @@ export default {
     this.fetchData(this.query);
   },
   mounted() {
-    this.$store.dispatch("ProductSingle/fetchSuppliersAll");
+    productSingleStore.fetchSuppliersAll();
   },
   methods: {
     changePerPage() {

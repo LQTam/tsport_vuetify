@@ -16,10 +16,18 @@
 </template>
 
 <script>
-import { mapGetters, mapActions } from "vuex";
+import alertStore from '@/store/modules/alert';
 export default {
     computed: {
-        ...mapGetters('Alert', ['message', 'errors', 'color'])
+        message() {
+          return alertStore.message;
+        },
+        errors() {
+          return alertStore.errors;
+        },
+        color() {
+          return alertStore.color;
+        }
     },
     destroyed() {
         this.resetState()
@@ -30,7 +38,9 @@ export default {
         }
     },
     methods: {
-        ...mapActions('Alert', ['resetState'])
+        resetState() {
+          alertStore.resetState();
+        }
     }
 };
 </script>
